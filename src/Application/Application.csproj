@@ -43,7 +43,6 @@
     <ItemGroup>
       <Folder Include="Features\RecommendationFeature\" />
       <Folder Include="Features\RoadmapFeature\EventHandler\" />
-      <Folder Include="Features\SearchFeature\" />
     </ItemGroup>
 
 </Project>

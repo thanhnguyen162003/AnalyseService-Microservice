@@ -7,13 +7,13 @@ namespace Application.Common.Kafka
         private readonly IConsumer<string, string> _consumer;
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<KafkaConsumerBase<T>> _logger;
-        private readonly string _topicName;
+        private readonly List<string> _topicName;
 
-        protected KafkaConsumerBase(IConfiguration configuration, ILogger<KafkaConsumerBase<T>> logger, IServiceProvider serviceProvider, string topicName, string groupId)
+        protected KafkaConsumerBase(IConfiguration configuration, ILogger<KafkaConsumerBase<T>> logger, IServiceProvider serviceProvider, List<string> topicName, string groupId)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
-            _topicName = topicName;
+            _topicName = topicName ?? throw new ArgumentNullException(nameof(topicName));
 
             var consumerConfig = new ConsumerConfig
             {
@@ -28,6 +28,10 @@ namespace Application.Common.Kafka
             };
 
             _consumer = new ConsumerBuilder<string, string>(consumerConfig).Build();
+        }
+        protected KafkaConsumerBase(IConfiguration configuration, ILogger<KafkaConsumerBase<T>> logger, IServiceProvider serviceProvider, string topicName, string groupId)
+            : this(configuration, logger, serviceProvider, new List<string> { topicName }, groupId)
+        {
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
