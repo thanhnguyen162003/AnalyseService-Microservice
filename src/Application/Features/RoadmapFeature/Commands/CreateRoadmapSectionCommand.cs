@@ -22,7 +22,7 @@ public class CreateRoadmapSectionCommandHandler(
     public async Task<ResponseModel> Handle(CreateRoadmapSectionCommand request, CancellationToken cancellationToken)
     {
         var client = new MongoClient(configuration.GetValue<string>("ConnectionStrings:MongoDbConnection"));
-        using (var session = await client.StartSessionAsync())
+        using (var session = await client.StartSessionAsync(cancellationToken: cancellationToken))
         {
             // Begin transaction
             session.StartTransaction();
@@ -51,13 +51,13 @@ public class CreateRoadmapSectionCommandHandler(
                     cancellationToken: cancellationToken);
                 await dbContext.Edge.InsertManyAsync(request.RoadMapSectionCreateCommand.Edges,
                     cancellationToken: cancellationToken);
-                await session.CommitTransactionAsync();
+                await session.CommitTransactionAsync(cancellationToken);
                 return new ResponseModel(HttpStatusCode.OK, "Roadmap section created");
             }
             catch (Exception e)
             {
                 logger.LogError("Error writing to MongoDB: " + e.Message);
-                await session.AbortTransactionAsync();
+                await session.AbortTransactionAsync(cancellationToken);
                 return new ResponseModel(HttpStatusCode.BadRequest,"Unable to create roadmap section");
             }
         }
