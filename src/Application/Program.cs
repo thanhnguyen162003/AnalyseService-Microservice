@@ -4,6 +4,7 @@ using Amazon.S3;
 using Application;
 using Application.Common.Exceptions;
 using Application.Common.Ultils;
+using Application.Configurations;
 using Carter;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -25,6 +26,8 @@ builder.Services.AddCors(options =>
                 .WithExposedHeaders("Content-Disposition");
         });
 });
+// Register Redis cache
+builder.Services.AddRedis(builder.Configuration);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
 builder.Services.AddAuthentication(options =>

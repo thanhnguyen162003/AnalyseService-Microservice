@@ -9,7 +9,8 @@ namespace Application.Common.Kafka
         private readonly ILogger<KafkaConsumerBase<T>> _logger;
         private readonly List<string> _topicName;
 
-        protected KafkaConsumerBase(IConfiguration configuration, ILogger<KafkaConsumerBase<T>> logger, IServiceProvider serviceProvider, List<string> topicName, string groupId)
+        protected KafkaConsumerBase(IConfiguration configuration, ILogger<KafkaConsumerBase<T>> logger,
+            IServiceProvider serviceProvider, List<string> topicName, string groupId)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
