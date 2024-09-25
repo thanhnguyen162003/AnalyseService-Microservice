@@ -6,6 +6,7 @@ using Application.Common.Interfaces.CloudinaryInterface;
 using Application.Common.Interfaces.KafkaInterface;
 using Application.Common.Models;
 using Application.Common.Ultils;
+using Application.Consumer;
 using Application.Features.RoadmapFeature.Validators;
 using Application.Infrastructure;
 using Application.Services;
@@ -18,7 +19,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddWebServices(this IServiceCollection services)
     {
-        // services.AddHostedService<SearchDataConsumer>();
+        services.AddHostedService<UserDataAnalyseConsumer>();
 
         //Inject Service, Repo, etc...
         services.AddSingleton<AnalyseDbContext>();
