@@ -4,6 +4,7 @@ using Application.Common.Interfaces.AWS3ServiceInterface;
 using Application.Common.Interfaces.ClaimInterface;
 using Application.Common.Interfaces.CloudinaryInterface;
 using Application.Common.Interfaces.KafkaInterface;
+using Application.Common.Kafka;
 using Application.Common.Models;
 using Application.Common.Ultils;
 using Application.Consumer;
@@ -11,7 +12,6 @@ using Application.Features.RoadmapFeature.Validators;
 using Application.Infrastructure;
 using Application.Quartz;
 using Application.Services;
-using Application.Worker;
 using Infrastructure.Data;
 using Microsoft.OpenApi.Models;
 using Quartz;
@@ -23,7 +23,7 @@ public static class DependencyInjection
     public static IServiceCollection AddWebServices(this IServiceCollection services)
     {
         services.AddHostedService<UserDataAnalyseConsumer>();
-        // services.AddHostedService<RecommendSystemWorker>();
+        
         services.AddQuartz(configure =>
         {
             var jobKey = new JobKey(nameof(ProcessOutboxMessagesJob));
@@ -32,7 +32,7 @@ public static class DependencyInjection
                 .AddJob<ProcessOutboxMessagesJob>(jobKey)
                 .AddTrigger(
                     trigger => trigger.ForJob(jobKey).WithSimpleSchedule(
-                        schedule => schedule.WithIntervalInHours(10).RepeatForever()));
+                        schedule => schedule.WithIntervalInSeconds(10).RepeatForever()));
 
             configure.UseMicrosoftDependencyInjectionJobFactory();
         });
@@ -45,10 +45,9 @@ public static class DependencyInjection
         //Inject Service, Repo, etc...
         services.AddSingleton<AnalyseDbContext>();
         services.AddScoped<IClaimInterface, ClaimService>();
-        services.AddScoped<BackgroundTaskService>();
         services.AddSingleton<IProducerService, ProducerService>();
         services.AddScoped<ICloudinaryService, CloudinaryService>();
-        // services.AddScoped<ImageToPdfHelper>();
+        services.AddSingleton<IKafkaConsumerMethod, KafkaConsumerMethod>();
         services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddScoped<IAWSS3Service, AWSS3Service>();
         

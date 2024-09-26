@@ -1,10 +1,13 @@
 using System.Net;
+using Application.Common.Interfaces.KafkaInterface;
 using Application.Common.Kafka;
+using Application.Constants;
 using Application.Services.CacheService.Intefaces;
 using Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.Extensions.Caching.Distributed;
 using MongoDB.Bson;
+using MongoDB.Driver;
 using Newtonsoft.Json;
 using SharedProject.Models;
 using JsonSerializer = System.Text.Json.JsonSerializer;
@@ -24,15 +27,48 @@ public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
         var context = serviceProvider.GetRequiredService<AnalyseDbContext>();
         var logger = serviceProvider.GetRequiredService<ILogger<UserDataAnalyseConsumer>>();
         var mapper = serviceProvider.GetRequiredService<IMapper>();
-
-
-        UserDataAnalyseModel userModel = JsonSerializer.Deserialize<UserDataAnalyseModel>(message);
+        var producer = serviceProvider.GetRequiredService<IProducerService>();
+        
         try
         {
+            var userModel = JsonConvert.DeserializeObject<UserDataAnalyseModel>(message);
             UserAnalyseEntity entity = mapper.Map<UserAnalyseEntity>(userModel);
-            entity.Id = ObjectId.GenerateNewId().ToString();
-            await context.UserAnalyseEntity.InsertOneAsync(entity);
-            logger.LogInformation($"UserDataAnalyse entity added: {entity.Id}");
+            // Check if an entity with the same UserId already exists
+            var existingEntity = await context.UserAnalyseEntity
+                .Find(e => e.UserId == entity.UserId)
+                .FirstOrDefaultAsync();
+            if (existingEntity is null)
+            {
+                RecommendedData recommendedData = new RecommendedData();
+                recommendedData.UserId = entity.UserId;
+                recommendedData.SubjectIds.AddRange(entity.Subjects);
+                recommendedData.Grade = entity.Grade;
+                recommendedData.TypeExam = entity.TypeExam;
+                await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.DataRecommended, entity.UserId.ToString(), recommendedData);
+            }
+            if (existingEntity is not null)
+            {
+                logger.LogInformation($"User with UserId {entity.UserId} already exists. Performing update...");
+                existingEntity.Address = entity.Address;
+                existingEntity.Grade = entity.Grade;
+                existingEntity.SchoolName = entity.SchoolName;
+                existingEntity.Major = entity.Major;
+                existingEntity.TypeExam = entity.TypeExam;
+                existingEntity.Subjects = entity.Subjects;
+                
+                await context.UserAnalyseEntity.ReplaceOneAsync(
+                    e => e.UserId == existingEntity.UserId,
+                    existingEntity
+                );
+
+                logger.LogInformation($"UserDataAnalyse entity updated: {existingEntity.Id}");
+            }
+            else
+            {
+                entity.Id = ObjectId.GenerateNewId().ToString();
+                await context.UserAnalyseEntity.InsertOneAsync(entity);
+                logger.LogInformation($"UserDataAnalyse entity added: {entity.Id}");
+            }
         }
         catch (Exception ex)
         {

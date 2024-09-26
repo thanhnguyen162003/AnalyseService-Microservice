@@ -72,7 +72,7 @@ namespace Application.Common.Kafka
 
             _consumer.Close();
         }
-
+       
         protected abstract Task ProcessMessage(string message, IServiceProvider serviceProvider);
     }
 }
