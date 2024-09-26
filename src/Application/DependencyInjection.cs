@@ -9,9 +9,12 @@ using Application.Common.Ultils;
 using Application.Consumer;
 using Application.Features.RoadmapFeature.Validators;
 using Application.Infrastructure;
+using Application.Quartz;
 using Application.Services;
+using Application.Worker;
 using Infrastructure.Data;
 using Microsoft.OpenApi.Models;
+using Quartz;
 
 namespace Application;
 
@@ -20,10 +23,29 @@ public static class DependencyInjection
     public static IServiceCollection AddWebServices(this IServiceCollection services)
     {
         services.AddHostedService<UserDataAnalyseConsumer>();
+        // services.AddHostedService<RecommendSystemWorker>();
+        services.AddQuartz(configure =>
+        {
+            var jobKey = new JobKey(nameof(ProcessOutboxMessagesJob));
 
+            configure
+                .AddJob<ProcessOutboxMessagesJob>(jobKey)
+                .AddTrigger(
+                    trigger => trigger.ForJob(jobKey).WithSimpleSchedule(
+                        schedule => schedule.WithIntervalInHours(10).RepeatForever()));
+
+            configure.UseMicrosoftDependencyInjectionJobFactory();
+        });
+
+        services.AddQuartzHostedService(options =>
+        {
+            options.WaitForJobsToComplete = true;
+        });
+        
         //Inject Service, Repo, etc...
         services.AddSingleton<AnalyseDbContext>();
         services.AddScoped<IClaimInterface, ClaimService>();
+        services.AddScoped<BackgroundTaskService>();
         services.AddSingleton<IProducerService, ProducerService>();
         services.AddScoped<ICloudinaryService, CloudinaryService>();
         // services.AddScoped<ImageToPdfHelper>();

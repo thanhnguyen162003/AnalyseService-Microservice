@@ -9,13 +9,6 @@ public static class RedisConfig
 {
     public static void AddRedis(this IServiceCollection services, IConfiguration configuration)
     {
-        // services.AddSingleton<IValidationDistributedCache>(provider =>
-        // {
-        //     var options = provider.GetRequiredService<IOptions<RedisCacheOptions>>().Value;
-        //     options.Configuration = configuration["RedisValidate:RedisConfiguration"];
-        //     options.InstanceName = configuration["RedisValidate:RedisInstance"];
-        //     return new ValidationDistributedCache(Options.Create(options));
-        // });
 
         // Configuration for Ordinary Cache
         services.AddSingleton<IOrdinaryDistributedCache>(provider =>

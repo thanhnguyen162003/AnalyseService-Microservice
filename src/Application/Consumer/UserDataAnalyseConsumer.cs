@@ -1,7 +1,10 @@
 using System.Net;
 using Application.Common.Kafka;
 using Application.Services.CacheService.Intefaces;
+using Domain.Entities;
+using Infrastructure.Data;
 using Microsoft.Extensions.Caching.Distributed;
+using MongoDB.Bson;
 using Newtonsoft.Json;
 using SharedProject.Models;
 using JsonSerializer = System.Text.Json.JsonSerializer;
@@ -17,34 +20,23 @@ public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
 
     protected override async Task ProcessMessage(string message, IServiceProvider serviceProvider)
     {
-        var _redis = serviceProvider.GetRequiredService<IOrdinaryDistributedCache>();
-        var _logger = serviceProvider.GetRequiredService<ILogger<UserDataAnalyseConsumer>>();
+        // var _redis = serviceProvider.GetRequiredService<IOrdinaryDistributedCache>();
+        var context = serviceProvider.GetRequiredService<AnalyseDbContext>();
+        var logger = serviceProvider.GetRequiredService<ILogger<UserDataAnalyseConsumer>>();
+        var mapper = serviceProvider.GetRequiredService<IMapper>();
 
 
-        UserDataAnalyseModel subjectImageModel = JsonSerializer.Deserialize<UserDataAnalyseModel>(message);
-        string key = $"{subjectImageModel.UserId}";
-        string? userData = await _redis.GetStringAsync(key);
-        
+        UserDataAnalyseModel userModel = JsonSerializer.Deserialize<UserDataAnalyseModel>(message);
         try
         {
-            // If the cached data exists, remove it and save the new data
-            if (!string.IsNullOrEmpty(userData))
-            {
-                await _redis.RemoveAsync(key);
-                _logger.LogInformation("Existing cache for key {Key} found and removed.", key);
-            }
-
-            // Serialize and save the new data in Redis
-            var loopHandling = new JsonSerializerSettings 
-            { 
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-            };
-            await _redis.SetStringAsync(key, JsonConvert.SerializeObject(subjectImageModel, loopHandling));
-            _logger.LogInformation("New data for key {Key} has been saved successfully.", key);
+            UserAnalyseEntity entity = mapper.Map<UserAnalyseEntity>(userModel);
+            entity.Id = ObjectId.GenerateNewId().ToString();
+            await context.UserAnalyseEntity.InsertOneAsync(entity);
+            logger.LogInformation($"UserDataAnalyse entity added: {entity.Id}");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while processing cache operations for key {Key}.", key);
+            logger.LogError(ex, "An error occurred while processing cache operations for key {ex}.", ex.Message);
         }
     }
 }

@@ -31,6 +31,8 @@
       <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.7" />
       <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+      <PackageReference Include="Quartz" Version="3.13.0" />
+      <PackageReference Include="Quartz.Extensions.Hosting" Version="3.13.0" />
       <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
       <PackageReference Include="Ardalis.GuardClauses" />
     </ItemGroup>
@@ -43,6 +45,7 @@
 
     <ItemGroup>
       <Folder Include="Features\RecommendationFeature\" />
+      <Folder Include="Features\RoadmapFeature\EventHandler\" />
       <Folder Include="KafkaMessageModel\" />
     </ItemGroup>
 
