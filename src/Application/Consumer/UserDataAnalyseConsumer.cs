@@ -40,8 +40,10 @@ public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
             //make roadmap here too-im not done yet
             if (existingEntity is null && userModel.Address is not null && userModel.TypeExam is not null)
             {
+                string mongoId = ObjectId.GenerateNewId().ToString();
                 RecommendedData recommendedData = new RecommendedData()
                 {
+                    Id = mongoId,
                     UserId = entity.UserId,
                     SubjectIds = entity.Subjects,
                     Grade = entity.Grade,
@@ -49,7 +51,7 @@ public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
                 };
                 UserAnalyseEntity userDataEntity = new UserAnalyseEntity()
                 {
-                    Id = ObjectId.GenerateNewId().ToString(),
+                    Id = mongoId,
                     Address = entity.Address,
                     Grade = entity.Grade,
                     SchoolName = entity.SchoolName,
