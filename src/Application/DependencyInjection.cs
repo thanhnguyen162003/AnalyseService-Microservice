@@ -14,6 +14,7 @@ using Application.Quartz;
 using Application.Services;
 using Infrastructure.Data;
 using Microsoft.OpenApi.Models;
+using MongoDB.Bson.Serialization;
 using Quartz;
 
 namespace Application;
@@ -41,7 +42,7 @@ public static class DependencyInjection
         {
             options.WaitForJobsToComplete = true;
         });
-        
+        BsonSerializer.RegisterSerializer(typeof(ICollection<Guid>), new ICollectionGuidSerializer());
         //Inject Service, Repo, etc...
         services.AddSingleton<AnalyseDbContext>();
         services.AddScoped<IClaimInterface, ClaimService>();
