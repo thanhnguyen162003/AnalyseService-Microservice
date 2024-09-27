@@ -11,6 +11,7 @@ public class MappingProfile : Profile
     {
         CreateMap<RoadMapSectionCreateRequestModel, Section>().ReverseMap();
         
-        CreateMap<UserAnalyseEntity, UserDataAnalyseModel>().ReverseMap();
+        CreateMap<UserDataAnalyseModel, UserAnalyseEntity>()
+            .ForMember(dest => dest.Subjects, opt => opt.MapFrom(src => src.Subjects));
     }
 }
