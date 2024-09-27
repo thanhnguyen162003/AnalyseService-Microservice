@@ -54,6 +54,7 @@ public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
                     Id = mongoId,
                     Address = entity.Address,
                     Grade = entity.Grade,
+                    UserId = entity.UserId,
                     SchoolName = entity.SchoolName,
                     Major = entity.Major,
                     TypeExam = entity.TypeExam,
@@ -67,6 +68,7 @@ public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
                 logger.LogInformation($"User with UserId {entity.UserId} already exists. Performing update...");
                 existingEntity.Address = entity.Address;
                 existingEntity.Grade = entity.Grade;
+                existingEntity.UserId = entity.UserId;
                 existingEntity.SchoolName = entity.SchoolName;
                 existingEntity.Major = entity.Major;
                 existingEntity.TypeExam = entity.TypeExam;
