@@ -37,7 +37,8 @@ public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
             var existingEntity = await context.UserAnalyseEntity
                 .Find(e => e.UserId == entity.UserId)
                 .FirstOrDefaultAsync();
-            if (existingEntity is null)
+            //make roadmap here too-im not done yet
+            if (existingEntity is null && userModel.Subjects?.Any() == true && userModel.Address is not null && userModel.TypeExam is not null)
             {
                 RecommendedData recommendedData = new RecommendedData();
                 recommendedData.UserId = entity.UserId;
@@ -46,7 +47,7 @@ public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
                 recommendedData.TypeExam = entity.TypeExam;
                 await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.DataRecommended, entity.UserId.ToString(), recommendedData);
             }
-            if (existingEntity is not null)
+            if (existingEntity is not null && userModel.Subjects?.Any() == true && userModel.Address is not null && userModel.TypeExam is not null)
             {
                 logger.LogInformation($"User with UserId {entity.UserId} already exists. Performing update...");
                 existingEntity.Address = entity.Address;
