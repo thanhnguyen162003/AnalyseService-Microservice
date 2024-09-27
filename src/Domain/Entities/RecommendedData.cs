@@ -8,13 +8,13 @@ public class RecommendedData
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
     public string Id { get; set; }
-    [BsonGuidRepresentation(GuidRepresentation.Standard)]
+    [BsonRepresentation(BsonType.String)]
     public List<Guid>? SubjectIds { get; set; }
-    [BsonGuidRepresentation(GuidRepresentation.Standard)]
+    [BsonRepresentation(BsonType.String)]
     public List<Guid>? DocumentIds { get; set; }
-    [BsonGuidRepresentation(GuidRepresentation.Standard)]
+    [BsonRepresentation(BsonType.String)]
     public List<Guid>? FlashcardIds { get; set; }
-    [BsonGuidRepresentation(GuidRepresentation.Standard)]
+    [BsonRepresentation(BsonType.String)]
     public Guid? UserId { get; set; }
     public int Grade { get; set; }
     public string? TypeExam { get; set; }

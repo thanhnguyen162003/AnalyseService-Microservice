@@ -8,7 +8,7 @@ public class UserAnalyseEntity
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
     public string Id { get; set; }
-    [BsonGuidRepresentation(GuidRepresentation.Standard)]
+    [BsonRepresentation(BsonType.String)]
     public Guid UserId { get; set; }
     public string? Address { get; set; }
     public int Grade { get; set; }

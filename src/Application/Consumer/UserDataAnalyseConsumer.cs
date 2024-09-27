@@ -35,7 +35,7 @@ public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
             UserAnalyseEntity entity = mapper.Map<UserAnalyseEntity>(userModel);
             // Check if an entity with the same UserId already exists
             var existingEntity = await context.UserAnalyseEntity
-                .Find(e => e.UserId == entity.UserId)
+                .Find(e => e.UserId.Equals(entity.UserId))
                 .FirstOrDefaultAsync();
             //make roadmap here too-im not done yet
             if (existingEntity is null && userModel.Address is not null && userModel.TypeExam is not null)
