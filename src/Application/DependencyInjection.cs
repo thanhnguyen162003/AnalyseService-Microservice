@@ -42,7 +42,7 @@ public static class DependencyInjection
         {
             options.WaitForJobsToComplete = true;
         });
-        BsonSerializer.RegisterSerializer(typeof(ICollection<Guid>), new ICollectionGuidSerializer());
+        // BsonSerializer.RegisterSerializer(typeof(ICollection<Guid>), new ICollectionGuidSerializer());
         //Inject Service, Repo, etc...
         services.AddSingleton<AnalyseDbContext>();
         services.AddScoped<IClaimInterface, ClaimService>();

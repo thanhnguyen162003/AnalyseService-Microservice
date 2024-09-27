@@ -15,5 +15,5 @@ public class UserAnalyseEntity
     public string? SchoolName { get; set; }
     public string? Major { get; set; }
     public string? TypeExam { get; set; }
-    public ICollection<Guid> Subjects { get; set; } = new HashSet<Guid>();
+    public List<Guid> Subjects { get; set; }
 }

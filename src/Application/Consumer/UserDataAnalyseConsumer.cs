@@ -57,7 +57,7 @@ public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
                     SchoolName = entity.SchoolName,
                     Major = entity.Major,
                     TypeExam = entity.TypeExam,
-                    Subjects = entity.Subjects
+                    Subjects = entity.Subjects.ToList()
                 };
                 await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.DataRecommended, entity.UserId.ToString(), recommendedData);
                 await context.UserAnalyseEntity.InsertOneAsync(userDataEntity);
@@ -70,7 +70,7 @@ public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
                 existingEntity.SchoolName = entity.SchoolName;
                 existingEntity.Major = entity.Major;
                 existingEntity.TypeExam = entity.TypeExam;
-                existingEntity.Subjects = entity.Subjects;
+                existingEntity.Subjects = entity.Subjects.ToList();
                 
                 RecommendedData recommendedData = new RecommendedData()
                 {
