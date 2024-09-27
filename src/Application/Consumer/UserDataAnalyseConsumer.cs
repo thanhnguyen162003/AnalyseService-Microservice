@@ -79,7 +79,8 @@ public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
                     UserId = entity.UserId,
                     SubjectIds = entity.Subjects,
                     Grade = entity.Grade,
-                    TypeExam = entity.TypeExam
+                    TypeExam = entity.TypeExam,
+                    Id = existingEntity.Id
                 };
                 await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.DataRecommended, entity.UserId.ToString(), recommendedData);
                 await context.UserAnalyseEntity.ReplaceOneAsync(
