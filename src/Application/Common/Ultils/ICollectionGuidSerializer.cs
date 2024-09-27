@@ -12,7 +12,7 @@ public class ICollectionGuidSerializer : SerializerBase<ICollection<Guid>>
         context.Writer.WriteStartArray();
         foreach (var guid in value)
         {
-            context.Writer.WriteBinaryData(new BsonBinaryData(guid, GuidRepresentation.Standard));
+            context.Writer.WriteBinaryData(new BsonBinaryData(guid, GuidRepresentation.CSharpLegacy));
         }
         context.Writer.WriteEndArray();
     }
