@@ -33,7 +33,7 @@ public static class DependencyInjection
                 .AddJob<ProcessOutboxMessagesJob>(jobKey)
                 .AddTrigger(
                     trigger => trigger.ForJob(jobKey).WithSimpleSchedule(
-                        schedule => schedule.WithIntervalInSeconds(10).RepeatForever()));
+                        schedule => schedule.WithIntervalInHours(10).RepeatForever()));
 
             configure.UseMicrosoftDependencyInjectionJobFactory();
         });
