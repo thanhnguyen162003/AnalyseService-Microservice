@@ -17,7 +17,7 @@ namespace Application.Consumer;
 public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
 {
     public UserDataAnalyseConsumer(IConfiguration configuration, ILogger<UserDataAnalyseConsumer> logger, IServiceProvider serviceProvider)
-        : base(configuration, logger, serviceProvider, "recommend_onboarding", "user_data_analyse_group")
+        : base(configuration, logger, serviceProvider, "recommend_onboarding", "user_data_analyses_group")
     {
     }
 
@@ -60,7 +60,7 @@ public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
                     TypeExam = entity.TypeExam,
                     Subjects = entity.Subjects
                 };
-                await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.DataRecommended, entity.UserId.ToString(), recommendedData);
+                producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.DataRecommended, entity.UserId.ToString(), recommendedData);
                 await context.UserAnalyseEntity.InsertOneAsync(userDataEntity);
             }
             if (existingEntity is not null && userModel.Address is not null && userModel.TypeExam is not null)
@@ -82,7 +82,7 @@ public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
                     TypeExam = entity.TypeExam,
                     Id = existingEntity.Id
                 };
-                await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.DataRecommended, entity.UserId.ToString(), recommendedData);
+                producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.DataRecommended, entity.UserId.ToString(), recommendedData);
                 await context.UserAnalyseEntity.ReplaceOneAsync(
                     e => e.UserId == existingEntity.UserId,
                     existingEntity

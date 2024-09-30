@@ -23,10 +23,10 @@ public class ProducerService : IProducerService
             SaslMechanism = SaslMechanism.Plain,
             Acks = Acks.All,
             CompressionType = CompressionType.Gzip,
-            // Timeout configurations
-            MessageTimeoutMs = 10000,   // 10 seconds timeout for a single message send
-            RequestTimeoutMs = 10000,   // 10 seconds request timeout
-            RetryBackoffMs = 200,      // 200 ms backoff between retries
+            // // Timeout configurations
+            // MessageTimeoutMs = 10000,   // 10 seconds timeout for a single message send
+            // RequestTimeoutMs = 10000,   // 10 seconds request timeout
+            // RetryBackoffMs = 1000,      // 200 ms backoff between retries
         };
         // Create the Kafka producer with string keys and values
         _producer = new ProducerBuilder<string, string>(producerConfig).Build();
