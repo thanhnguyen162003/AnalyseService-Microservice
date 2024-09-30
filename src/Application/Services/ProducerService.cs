@@ -23,7 +23,7 @@ public class ProducerService : IProducerService
             SaslMechanism = SaslMechanism.Plain,
             Acks = Acks.All,
             CompressionType = CompressionType.Gzip,
-            LingerMs = 5000
+            LingerMs = 10000
             // // Timeout configurations
             // MessageTimeoutMs = 10000,   // 10 seconds timeout for a single message send
             // RequestTimeoutMs = 10000,   // 10 seconds request timeout
@@ -81,6 +81,21 @@ public class ProducerService : IProducerService
             return false;
         }
     }
+    public Task ProduceObjectWithKeyAsyncBatch<T>(string topic, string key, T obj)
+    {
+        try
+        {
+            string json = JsonConvert.SerializeObject(obj);
+            var kafkaMessage = new Message<string, string> { Key = key, Value = json };
+            _producer.ProduceAsync(topic, kafkaMessage);
+        }
+        catch (ProduceException<string, string> ex)
+        { 
+            _logger.LogError($"Failed to deliver message: {ex.Error.Reason}");
+            return Task.FromException(ex);
+        }
+        return Task.CompletedTask;
+    }
 
     public async Task<bool> ProduceObjectAsync<T>(string topic, T obj)
     {
@@ -96,5 +111,10 @@ public class ProducerService : IProducerService
             _logger.LogError($"Failed to deliver message: {ex.Error.Reason}");
             return false;
         }
+    }
+    
+    public async Task FlushedData(TimeSpan timeSpan)
+    {
+        _producer.Flush(timeSpan);
     }
 }   
