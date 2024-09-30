@@ -17,7 +17,7 @@ namespace Application.Consumer;
 public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
 {
     public UserDataAnalyseConsumer(IConfiguration configuration, ILogger<UserDataAnalyseConsumer> logger, IServiceProvider serviceProvider)
-        : base(configuration, logger, serviceProvider, "recommend_onboarding", "user_data_analyses_group")
+        : base(configuration, logger, serviceProvider, "recommend_onboarding", "user_data_analyze_group")
     {
     }
 

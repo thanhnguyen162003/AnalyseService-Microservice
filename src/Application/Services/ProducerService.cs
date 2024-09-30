@@ -23,6 +23,7 @@ public class ProducerService : IProducerService
             SaslMechanism = SaslMechanism.Plain,
             Acks = Acks.All,
             CompressionType = CompressionType.Gzip,
+            LingerMs = 5000
             // // Timeout configurations
             // MessageTimeoutMs = 10000,   // 10 seconds timeout for a single message send
             // RequestTimeoutMs = 10000,   // 10 seconds request timeout
