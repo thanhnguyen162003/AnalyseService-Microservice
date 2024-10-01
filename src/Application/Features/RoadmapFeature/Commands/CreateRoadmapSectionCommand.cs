@@ -28,12 +28,12 @@ public class CreateRoadmapSectionCommandHandler(
             session.StartTransaction();
             try
             {
-                var section = mapper.Map<Section>(request.RoadMapSectionCreateCommand);
+                var section = mapper.Map<Roadmap>(request.RoadMapSectionCreateCommand);
                 section.Id = ObjectId.GenerateNewId().ToString();
                 await dbContext.Section.InsertOneAsync(section, cancellationToken: cancellationToken);
                 foreach (var content in request.RoadMapSectionCreateCommand.Nodes)
                 {
-                    content.SectionId = section.Id;
+                    content.RoadmapId = section.Id;
                     content.Id = ObjectId.GenerateNewId().ToString();
                     content.CreatedAt = DateTime.UtcNow;
                     content.UpdatedAt = DateTime.UtcNow;
@@ -41,7 +41,7 @@ public class CreateRoadmapSectionCommandHandler(
                 }
                 foreach (var content in request.RoadMapSectionCreateCommand.Edges)
                 {
-                    content.SectionId = section.Id;
+                    content.RoadmapId = section.Id;
                     content.Id = ObjectId.GenerateNewId().ToString();
                     content.CreatedAt = DateTime.UtcNow;
                     content.UpdatedAt = DateTime.UtcNow;

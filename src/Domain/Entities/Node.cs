@@ -14,10 +14,8 @@ public class Node : BaseAuditableEntity
     
     [BsonRepresentation(BsonType.ObjectId)]
     [JsonIgnore]
-    public string SectionId { get; set; }
-
-    // public string? NodeContent { get; set; }
-
+    public string RoadmapId { get; set; }
+    
     public int? PositionX { get; set; }
     
     public int? PositionY { get; set; }
@@ -26,5 +24,8 @@ public class Node : BaseAuditableEntity
     
     public string? DataLabel { get; set; }
     
+    public string? NodeId { get; set; }
+    
+    [BsonRepresentation(BsonType.String)]
     public Guid? DataId { get; set; }
 }

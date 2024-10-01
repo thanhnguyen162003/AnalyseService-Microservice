@@ -14,13 +14,15 @@ public class Edge : BaseAuditableEntity
     
     [BsonRepresentation(BsonType.ObjectId)]
     [JsonIgnore]
-    public string SectionId { get; set; }
+    public string RoadmapId { get; set; }
 
     public string? Source { get; set; }
 
     public string? Target { get; set; }
     
     public string? Type { get; set; }
+
+    public string EdgeId { get; set; }
     
     public bool? Animated { get; set; }
 }

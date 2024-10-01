@@ -20,7 +20,7 @@ public class AnalyseDbContext
     }
     public IMongoCollection<Edge> Edge => _database.GetCollection<Edge>("Edge");
     public IMongoCollection<Node> Node => _database.GetCollection<Node>("Node");
-    public IMongoCollection<Section> Section => _database.GetCollection<Section>("Section");
+    public IMongoCollection<Roadmap> Section => _database.GetCollection<Roadmap>("Roadmap");
     public IMongoCollection<UserAnalyseEntity> UserAnalyseEntity => _database.GetCollection<UserAnalyseEntity>("UserAnalyseEntity");
     public IMongoCollection<RecommendedData> RecommendedData => _database.GetCollection<RecommendedData>("RecommendedData");
 }

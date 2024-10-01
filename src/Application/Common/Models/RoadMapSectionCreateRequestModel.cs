@@ -4,13 +4,13 @@ namespace Application.Common.Models;
 
 public class RoadMapSectionCreateRequestModel
 {
-    // public string Id { get; set; }
+    public string RoadmapName { get; set; }
+
+    public string ContentJson { get; set; }
+
+    public string RoadmapDescription { get; set; }
     
-    public string SectionName { get; set; }
-
-    public string Content { get; set; }
-
-    public string SectionDescription { get; set; }
+    public List<Guid> RoadmapDocumentId { get; set; }
     
     public List<Node> Nodes { get; set; }
     

@@ -5,20 +5,21 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Domain.Entities;
 
-public class Section : BaseAuditableEntity
+public class Roadmap : BaseAuditableEntity
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
     [JsonIgnore]
     public string Id { get; set; }
     
-    public string SectionName { get; set; }
+    public string RoadmapName { get; set; }
 
-    public string Content { get; set; }
+    public string ContentJson { get; set; }
 
-    public string SectionDescription { get; set; }
-    
-    public int Order { get; set; }
+    public string RoadmapDescription { get; set; }
+
+    [BsonRepresentation(BsonType.String)]
+    public List<Guid> RoadmapDocumentId { get; set; }
     
     public ICollection<Node> Nodes { get; set; } = new List<Node>();
 

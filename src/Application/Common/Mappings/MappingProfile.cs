@@ -9,7 +9,7 @@ public class MappingProfile : Profile
 {
     public MappingProfile()
     {
-        CreateMap<RoadMapSectionCreateRequestModel, Section>().ReverseMap();
+        CreateMap<RoadMapSectionCreateRequestModel, Roadmap>().ReverseMap();
         
         CreateMap<UserDataAnalyseModel, UserAnalyseEntity>()
             .ForMember(dest => dest.Subjects, opt => opt.MapFrom(src => src.Subjects));
