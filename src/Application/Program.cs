@@ -23,13 +23,13 @@ builder.Services.AddCors(options =>
             builder.AllowAnyOrigin()
                 .AllowAnyMethod()
                 .AllowAnyHeader()
-                .WithExposedHeaders("Content-Disposition");
+                .WithExposedHeaders("Location", "X-Pagination");
         });
 });
 // Register Redis cache
 builder.Services.AddRedis(builder.Configuration);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
+// builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

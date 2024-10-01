@@ -19,7 +19,12 @@ public class Roadmap : BaseAuditableEntity
     public string RoadmapDescription { get; set; }
 
     [BsonRepresentation(BsonType.String)]
-    public List<Guid> RoadmapDocumentId { get; set; }
+    public List<Guid> RoadmapSubjectIds { get; set; }
+    
+    [BsonRepresentation(BsonType.String)]
+    public List<Guid>? RoadmapDocumentIds { get; set; }
+    
+    public List<string> TypeExam { get; set; }
     
     public ICollection<Node> Nodes { get; set; } = new List<Node>();
 

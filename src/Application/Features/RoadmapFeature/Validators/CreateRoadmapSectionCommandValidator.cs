@@ -22,7 +22,10 @@ public class CreateRoadmapSectionCommandValidator : AbstractValidator<RoadMapSec
         RuleFor(v => v.ContentJson)
             .NotEmpty();
         
-        RuleFor(v => v.RoadmapDocumentId)
+        RuleFor(v => v.RoadmapSubjectIds)
+            .NotEmpty();
+        
+        RuleFor(v => v.TypeExam)
             .NotEmpty();
         
         RuleFor(v => v.Nodes)

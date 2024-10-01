@@ -30,7 +30,7 @@ public class CreateRoadmapSectionCommandHandler(
             {
                 var section = mapper.Map<Roadmap>(request.RoadMapSectionCreateCommand);
                 section.Id = ObjectId.GenerateNewId().ToString();
-                await dbContext.Section.InsertOneAsync(section, cancellationToken: cancellationToken);
+                await dbContext.Roadmap.InsertOneAsync(section, cancellationToken: cancellationToken);
                 foreach (var content in request.RoadMapSectionCreateCommand.Nodes)
                 {
                     content.RoadmapId = section.Id;

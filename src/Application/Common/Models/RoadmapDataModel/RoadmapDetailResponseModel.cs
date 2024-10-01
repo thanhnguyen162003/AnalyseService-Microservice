@@ -1,8 +1,8 @@
 using Domain.Entities;
 
-namespace Application.Common.Models;
+namespace Application.Common.Models.RoadmapDataModel;
 
-public class RoadMapSectionCreateRequestModel
+public class RoadmapDetailResponseModel
 {
     public string RoadmapName { get; set; }
 
