@@ -22,12 +22,13 @@ public class ProducerService : IProducerService
             SecurityProtocol = SecurityProtocol.SaslSsl,
             SaslMechanism = SaslMechanism.Plain,
             Acks = Acks.All,
+            MessageSendMaxRetries = 3,
             CompressionType = CompressionType.Gzip,
-            LingerMs = 10000
+            LingerMs = 1000,
             // // Timeout configurations
-            // MessageTimeoutMs = 10000,   // 10 seconds timeout for a single message send
-            // RequestTimeoutMs = 10000,   // 10 seconds request timeout
-            // RetryBackoffMs = 1000,      // 200 ms backoff between retries
+            MessageTimeoutMs = 10000,   // 10 seconds timeout for a single message send
+            RequestTimeoutMs = 5000,   // 5 seconds request timeout
+            RetryBackoffMs = 1000,      // 1 s backoff between retries
         };
         // Create the Kafka producer with string keys and values
         _producer = new ProducerBuilder<string, string>(producerConfig).Build();
