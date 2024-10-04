@@ -60,7 +60,7 @@ public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
                     TypeExam = entity.TypeExam,
                     Subjects = entity.Subjects
                 };
-                producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.DataRecommended, entity.UserId.ToString(), recommendedData);
+                await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.DataRecommended, entity.UserId.ToString(), recommendedData);
                 await context.UserAnalyseEntity.InsertOneAsync(userDataEntity);
             }
             if (existingEntity is not null && userModel.Address is not null && userModel.TypeExam is not null)
@@ -82,7 +82,7 @@ public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
                     TypeExam = entity.TypeExam,
                     Id = existingEntity.Id
                 };
-                producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.DataRecommended, entity.UserId.ToString(), recommendedData);
+                await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.DataRecommended, entity.UserId.ToString(), recommendedData);
                 await context.UserAnalyseEntity.ReplaceOneAsync(
                     e => e.UserId == existingEntity.UserId,
                     existingEntity

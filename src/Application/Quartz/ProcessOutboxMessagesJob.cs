@@ -131,7 +131,7 @@ public class ProcessOutboxMessagesJob : IJob
             {
                 var topSubjectIds = data
                     .Where(d => d.SubjectId.HasValue)
-                    .GroupBy(d => d.SubjectId.Value)
+                    .GroupBy(d => d.SubjectId!.Value)
                     .Select(group => new { SubjectId = group.Key })
                     .Take(4)
                     .Select(x => x.SubjectId)
@@ -140,7 +140,7 @@ public class ProcessOutboxMessagesJob : IJob
 
                 var topDocumentIds = data
                     .Where(d => d.DocumentId.HasValue)
-                    .GroupBy(d => d.DocumentId.Value)
+                    .GroupBy(d => d.DocumentId!.Value)
                     .Select(group => new { DocumentId = group.Key, Count = group.Count() })
                     .OrderByDescending(x => x.Count)
                     .Take(8)
@@ -149,7 +149,7 @@ public class ProcessOutboxMessagesJob : IJob
 
                 var topFlashcardIds = data
                     .Where(d => d.FlashcardId.HasValue)
-                    .GroupBy(d => d.FlashcardId.Value)
+                    .GroupBy(d => d.FlashcardId!.Value)
                     .Select(group => new { FlashcardId = group.Key, Count = group.Count() })
                     .OrderByDescending(x => x.Count)
                     .Take(8)
@@ -180,7 +180,7 @@ public class ProcessOutboxMessagesJob : IJob
                 // Send each recommended data in the batch
                 await _producerService.ProduceObjectWithKeyAsyncBatch(TopicKafkaConstaints.DataRecommended, recommendedData.UserId.ToString(), recommendedData);
             }
-            _producerService.FlushedData(TimeSpan.FromSeconds(10)); 
+            await _producerService.FlushedData(TimeSpan.FromSeconds(10)); 
             await _dbContext.RecommendedData.InsertManyAsync(recommendedDatas);
         }
     }
