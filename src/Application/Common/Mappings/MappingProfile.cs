@@ -10,7 +10,11 @@ public class MappingProfile : Profile
 {
     public MappingProfile()
     {
-        CreateMap<RoadMapSectionCreateRequestModel, Roadmap>().ReverseMap();
+        CreateMap<RoadMapSectionCreateRequestModel, Roadmap>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.RoadmapId))
+            .ReverseMap();
+
+        CreateMap<RoadmapCreateRequestModel, Roadmap>().ReverseMap();
         
         CreateMap<RoadmapResponseModel, Roadmap>().ReverseMap();
         

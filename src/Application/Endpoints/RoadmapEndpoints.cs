@@ -16,12 +16,13 @@ public class RoadmapEndpoints : ICarterModule
     public void AddRoutes(IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("api/v1");
+        group.MapPost("roadmap/detail",CreateRoadmapDetail).RequireAuthorization("moderatorPolicy").WithName(nameof(CreateRoadmapDetail));
         group.MapPost("roadmap",CreateRoadmap).RequireAuthorization("moderatorPolicy").WithName(nameof(CreateRoadmap));
         group.MapGet("roadmap",GetRoadmapFilter).WithName(nameof(GetRoadmapFilter));
         group.MapGet("roadmap/{id}",GetRoadmapDetailById).WithName(nameof(GetRoadmapDetailById));
     }
 
-    public static async Task<IResult> CreateRoadmap([FromBody] RoadMapSectionCreateRequestModel roadMapSectionCreateRequestModel, ISender sender,
+    public static async Task<IResult> CreateRoadmapDetail([FromBody] RoadMapSectionCreateRequestModel roadMapSectionCreateRequestModel, ISender sender,
         CancellationToken cancellationToken, ValidationHelper<RoadMapSectionCreateRequestModel> validator)
     {
         var (isValid, response) = await validator.ValidateAsync(roadMapSectionCreateRequestModel);
@@ -29,9 +30,24 @@ public class RoadmapEndpoints : ICarterModule
         {
             return Results.BadRequest(response);
         }
-        var command = new CreateRoadmapSectionCommand()
+        var command = new RoadmapDetailCreateCommand()
         {
             RoadMapSectionCreateCommand = roadMapSectionCreateRequestModel
+        };
+        var result = await sender.Send(command, cancellationToken);
+        return JsonHelper.Json(result);
+    }
+    public static async Task<IResult> CreateRoadmap([FromBody] RoadmapCreateRequestModel roadmapCreateRequestModel, ISender sender,
+        CancellationToken cancellationToken, ValidationHelper<RoadmapCreateRequestModel> validator)
+    {
+        var (isValid, response) = await validator.ValidateAsync(roadmapCreateRequestModel);
+        if (!isValid)
+        {
+            return Results.BadRequest(response);
+        }
+        var command = new CreateRoadmapCommand()
+        {
+            RoadmapCreateRequestModel = roadmapCreateRequestModel
         };
         var result = await sender.Send(command, cancellationToken);
         return JsonHelper.Json(result);

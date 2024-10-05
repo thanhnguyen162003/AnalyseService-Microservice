@@ -8,18 +8,17 @@ using MongoDB.Driver;
 
 namespace Application.Features.RoadmapFeature.Commands;
 
-public record CreateRoadmapSectionCommand : IRequest<ResponseModel>
+public record RoadmapDetailCreateCommand : IRequest<ResponseModel>
 {
-    public RoadMapSectionCreateRequestModel RoadMapSectionCreateCommand;
+    public required RoadMapSectionCreateRequestModel RoadMapSectionCreateCommand;
 }
-public class CreateRoadmapSectionCommandHandler(
-    IMapper mapper,
+public class RoadmapDetailCreateCommandHandler(
     AnalyseDbContext dbContext,
     IConfiguration configuration,
-    ILogger<CreateRoadmapSectionCommandHandler> logger)
-    : IRequestHandler<CreateRoadmapSectionCommand, ResponseModel>
+    ILogger<RoadmapDetailCreateCommandHandler> logger)
+    : IRequestHandler<RoadmapDetailCreateCommand, ResponseModel>
 {
-    public async Task<ResponseModel> Handle(CreateRoadmapSectionCommand request, CancellationToken cancellationToken)
+    public async Task<ResponseModel> Handle(RoadmapDetailCreateCommand request, CancellationToken cancellationToken)
     {
         var client = new MongoClient(configuration.GetValue<string>("ConnectionStrings:MongoDbConnection"));
         using (var session = await client.StartSessionAsync(cancellationToken: cancellationToken))
@@ -28,12 +27,13 @@ public class CreateRoadmapSectionCommandHandler(
             session.StartTransaction();
             try
             {
-                var section = mapper.Map<Roadmap>(request.RoadMapSectionCreateCommand);
-                section.Id = ObjectId.GenerateNewId().ToString();
-                await dbContext.Roadmap.InsertOneAsync(section, cancellationToken: cancellationToken);
+                var roadmap = await dbContext.Roadmap.Find(r => r.Id == request.RoadMapSectionCreateCommand.RoadmapId).FirstOrDefaultAsync(cancellationToken);
+                await dbContext.Roadmap.UpdateOneAsync(r => r.Id == roadmap.Id,
+                 Builders<Roadmap>.Update.Set(r => r.ContentJson, request.RoadMapSectionCreateCommand.ContentJson),
+                  cancellationToken: cancellationToken);
                 foreach (var content in request.RoadMapSectionCreateCommand.Nodes)
                 {
-                    content.RoadmapId = section.Id;
+                    content.RoadmapId = roadmap.Id;
                     content.Id = ObjectId.GenerateNewId().ToString();
                     content.CreatedAt = DateTime.UtcNow;
                     content.UpdatedAt = DateTime.UtcNow;
@@ -41,7 +41,7 @@ public class CreateRoadmapSectionCommandHandler(
                 }
                 foreach (var content in request.RoadMapSectionCreateCommand.Edges)
                 {
-                    content.RoadmapId = section.Id;
+                    content.RoadmapId = roadmap.Id;
                     content.Id = ObjectId.GenerateNewId().ToString();
                     content.CreatedAt = DateTime.UtcNow;
                     content.UpdatedAt = DateTime.UtcNow;
@@ -52,7 +52,8 @@ public class CreateRoadmapSectionCommandHandler(
                 await dbContext.Edge.InsertManyAsync(request.RoadMapSectionCreateCommand.Edges,
                     cancellationToken: cancellationToken);
                 await session.CommitTransactionAsync(cancellationToken);
-                return new ResponseModel(HttpStatusCode.OK, "Roadmap section created");
+                logger.LogInformation("Roadmap Detail created successfully with id: {RoadmapDetailId}", roadmap.Id);
+                return new ResponseModel(HttpStatusCode.OK, "Roadmap Detail created");
             }
             catch (Exception e)
             {

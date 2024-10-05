@@ -6,6 +6,7 @@ using Application.Common.Interfaces.CloudinaryInterface;
 using Application.Common.Interfaces.KafkaInterface;
 using Application.Common.Kafka;
 using Application.Common.Models;
+using Application.Common.Models.RoadmapDataModel;
 using Application.Common.Ultils;
 using Application.Consumer;
 using Application.Features.RoadmapFeature.Validators;
@@ -54,6 +55,7 @@ public static class DependencyInjection
         
         //validator
         services.AddScoped<IValidator<RoadMapSectionCreateRequestModel>, CreateRoadmapSectionCommandValidator>();
+        services.AddScoped<IValidator<RoadmapCreateRequestModel>, CreateRoadmapCommandValidator>();
         services.AddScoped(typeof(ValidationHelper<>));
         
         services.AddMediatR(cfg =>

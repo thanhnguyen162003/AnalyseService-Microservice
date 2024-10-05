@@ -2,15 +2,12 @@ using System.Net;
 using Application.Common.Interfaces.KafkaInterface;
 using Application.Common.Kafka;
 using Application.Constants;
-using Application.Services.CacheService.Intefaces;
 using Domain.Entities;
 using Infrastructure.Data;
-using Microsoft.Extensions.Caching.Distributed;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using SharedProject.Models;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Application.Consumer;
 
@@ -38,7 +35,7 @@ public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
                 .Find(e => e.UserId.Equals(entity.UserId))
                 .FirstOrDefaultAsync();
             //make roadmap here too-im not done yet
-            if (existingEntity is null && userModel.Address is not null && userModel.TypeExam is not null)
+            if (existingEntity is null && userModel!.Address is not null && userModel.TypeExam is not null)
             {
                 string mongoId = ObjectId.GenerateNewId().ToString();
                 RecommendedData recommendedData = new RecommendedData()
@@ -63,7 +60,7 @@ public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
                 await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.DataRecommended, entity.UserId.ToString(), recommendedData);
                 await context.UserAnalyseEntity.InsertOneAsync(userDataEntity);
             }
-            if (existingEntity is not null && userModel.Address is not null && userModel.TypeExam is not null)
+            if (existingEntity is not null && userModel!.Address is not null && userModel.TypeExam is not null)
             {
                 logger.LogInformation($"User with UserId {entity.UserId} already exists. Performing update...");
                 existingEntity.Address = entity.Address;
