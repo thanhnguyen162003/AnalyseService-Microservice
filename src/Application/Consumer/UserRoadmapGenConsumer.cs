@@ -1,6 +1,7 @@
 using Application.Common.Interfaces.KafkaInterface;
 using Application.Common.Kafka;
 using Application.Constants;
+using Application.KafkaMessageModel;
 using Domain.Entities;
 using Infrastructure.Data;
 using MongoDB.Bson;
@@ -44,16 +45,29 @@ public class UserRoadmapGenConsumer : KafkaConsumerBase<UserDataAnalyseModel>
                     {
                         Roadmap = roadmap,
                         //intersect 2 list to get the number of matching subjectIds
-                        MatchingSubjects = roadmap.RoadmapSubjectIds.Intersect(subjectIds).Count()
+                        MatchingSubjects = roadmap.RoadmapSubjectIds.Intersect(subjectIds).Count(),
+                        MatchingTypeExam = roadmap.TypeExam.Intersect(
+                        entity.TypeExam?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? Array.Empty<string>()).Count(),
                     })
                     .OrderByDescending(x => x.MatchingSubjects)
+                    .ThenByDescending(x => x.MatchingTypeExam)
                     .Take(4)
                     .Select(x => x.Roadmap)
                     .ToList();
                 //send back to user 1
                 var random = new Random();
                 var selectedRoadmap = matchingRoadmaps[random.Next(matchingRoadmaps.Count)];
-                await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.UserRoadmapGenCreated, entity.UserId.ToString(), selectedRoadmap);
+                RoadmapUserKafkaMessageModel messageModel = new RoadmapUserKafkaMessageModel(){
+                    RoadmapId = selectedRoadmap.Id,
+                    RoadmapName = selectedRoadmap.RoadmapName,
+                    RoadmapSubjectIds = selectedRoadmap.RoadmapSubjectIds,
+                    RoadmapDescription = selectedRoadmap.RoadmapDescription,
+                    TypeExam = selectedRoadmap.TypeExam,
+                    ContentJson = selectedRoadmap.ContentJson,
+                    RoadmapDocumentIds = selectedRoadmap.RoadmapDocumentIds,
+                    UserId = entity.UserId
+                };
+                await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.UserRoadmapGenCreated, entity.UserId.ToString(), messageModel);
             }
             
         }
