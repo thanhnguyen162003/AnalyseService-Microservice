@@ -25,7 +25,8 @@ public static class DependencyInjection
     public static IServiceCollection AddWebServices(this IServiceCollection services)
     {
         services.AddHostedService<UserDataAnalyseConsumer>();
-        
+        services.AddHostedService<UserRoadmapGenConsumer>();
+
         services.AddQuartz(configure =>
         {
             var jobKey = new JobKey(nameof(ProcessOutboxMessagesJob));

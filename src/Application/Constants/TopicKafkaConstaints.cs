@@ -23,7 +23,7 @@ public static class TopicKafkaConstaints
     //Analyse-topic
     public const string UserRoadmapCreated = "user_roadmap_created";
     public const string DataRecommended = "data_recommended";
-    
+    public const string UserRoadmapGenCreated = "user_roadmap_gen_created";
     
     //Validation-topic
     public const string SubjectValidation = "subject_validation";

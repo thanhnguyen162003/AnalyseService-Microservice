@@ -1,5 +1,6 @@
 using Application.Common.Interfaces.KafkaInterface;
 using Application.Common.Kafka;
+using Application.Constants;
 using Domain.Entities;
 using Infrastructure.Data;
 using MongoDB.Bson;
@@ -28,15 +29,31 @@ public class UserRoadmapGenConsumer : KafkaConsumerBase<UserDataAnalyseModel>
         {
             var userModel = JsonConvert.DeserializeObject<UserDataAnalyseModel>(message);
             UserAnalyseEntity entity = mapper.Map<UserAnalyseEntity>(userModel);
-            // Check if an entity with the same UserId already exists
-            var existingEntity = await context.UserAnalyseEntity
-                .Find(e => e.UserId.Equals(entity.UserId))
-                .FirstOrDefaultAsync();
+            //base on user subjectIds, find all the roadmapSubjectIds that most match with user subjectIds
+            //then, send back to user 1
             string mongoId = ObjectId.GenerateNewId().ToString();
             List<Guid> subjectIds = entity.Subjects;
-            if (subjectIds.Count >= 3) // must be 3 subject at least to generate roadmap
+            if (subjectIds.Count >= 3)
             {
-                
+                var roadmaps = await context.Roadmap
+                    .Find(_ => true)
+                    .ToListAsync();
+
+                var matchingRoadmaps = roadmaps
+                    .Select(roadmap => new
+                    {
+                        Roadmap = roadmap,
+                        //intersect 2 list to get the number of matching subjectIds
+                        MatchingSubjects = roadmap.RoadmapSubjectIds.Intersect(subjectIds).Count()
+                    })
+                    .OrderByDescending(x => x.MatchingSubjects)
+                    .Take(4)
+                    .Select(x => x.Roadmap)
+                    .ToList();
+                //send back to user 1
+                var random = new Random();
+                var selectedRoadmap = matchingRoadmaps[random.Next(matchingRoadmaps.Count)];
+                await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.UserRoadmapGenCreated, entity.UserId.ToString(), selectedRoadmap);
             }
             
         }
