@@ -24,7 +24,7 @@ public class ProducerService : IProducerService
             Acks = Acks.All,
             MessageSendMaxRetries = 3,
             CompressionType = CompressionType.Gzip,
-            LingerMs = 1000,
+            LingerMs = 2000,
             // Adjust timeout configurations
             MessageTimeoutMs = 30000,    // Increase to 30 seconds
             RequestTimeoutMs = 15000,    // Increase to 15 seconds
