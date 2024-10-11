@@ -25,10 +25,10 @@ public class ProducerService : IProducerService
             MessageSendMaxRetries = 3,
             CompressionType = CompressionType.Gzip,
             LingerMs = 1000,
-            // // Timeout configurations
-            MessageTimeoutMs = 10000,   // 10 seconds timeout for a single message send
-            RequestTimeoutMs = 5000,   // 5 seconds request timeout
-            RetryBackoffMs = 1000,      // 1 s backoff between retries
+            // Adjust timeout configurations
+            MessageTimeoutMs = 30000,    // Increase to 30 seconds
+            RequestTimeoutMs = 15000,    // Increase to 15 seconds
+            RetryBackoffMs = 1000,       // Keep as is
         };
         // Create the Kafka producer with string keys and values
         _producer = new ProducerBuilder<string, string>(producerConfig).Build();

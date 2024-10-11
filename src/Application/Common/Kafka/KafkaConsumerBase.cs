@@ -67,7 +67,7 @@ namespace Application.Common.Kafka
                     _logger.LogError($"Error processing Kafka message: {ex.Message}");
                 }
 
-                await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
+                await Task.Delay(TimeSpan.FromSeconds(3), stoppingToken);
             }
 
             _consumer.Close();
