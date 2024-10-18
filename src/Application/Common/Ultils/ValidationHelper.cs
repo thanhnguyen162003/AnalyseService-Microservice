@@ -1,5 +1,5 @@
 using System.Net;
-using Application.Common.Models;
+using Application.Common.Models.SearchModel;
 using FluentValidation.Results;
 
 namespace Application.Common.Ultils;

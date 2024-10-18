@@ -1,5 +1,6 @@
 using System.Net;
 using Application.Common.Models;
+using Application.Common.Models.SearchModel;
 using Domain.Entities;
 using Infrastructure.Data;
 using MongoDB.Bson;

@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace Application.Common.Models;
+namespace Application.Common.Models.SearchModel;
 
 public class ResponseModel
 {

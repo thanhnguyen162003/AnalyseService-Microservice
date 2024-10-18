@@ -13,6 +13,7 @@ using Application.Features.RoadmapFeature.Validators;
 using Application.Infrastructure;
 using Application.Quartz;
 using Application.Services;
+using Application.Services.Search;
 using Infrastructure.Data;
 using Microsoft.OpenApi.Models;
 using MongoDB.Bson.Serialization;
@@ -53,6 +54,7 @@ public static class DependencyInjection
         services.AddSingleton<IKafkaConsumerMethod, KafkaConsumerMethod>();
         services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddScoped<IAWSS3Service, AWSS3Service>();
+        services.AddScoped<ISearchService, SearchService>();
         
         //validator
         services.AddScoped<IValidator<RoadMapSectionCreateRequestModel>, CreateRoadmapSectionCommandValidator>();
