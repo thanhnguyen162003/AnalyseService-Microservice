@@ -1,4 +1,5 @@
-﻿using Application.Features.SearchFeature.Queries;
+﻿using Application.Common.Ultils;
+using Application.Features.SearchFeature.Queries;
 using Application.Services.Search;
 using Carter;
 using Microsoft.AspNetCore.Mvc;
@@ -18,6 +19,6 @@ public class SearchEndpoints : ICarterModule
     {
         var result = await sender.Send(searchQuery, cancellationToken);
 
-        return Results.Ok(result);
+        return JsonHelper.Json(result);
     }
 }

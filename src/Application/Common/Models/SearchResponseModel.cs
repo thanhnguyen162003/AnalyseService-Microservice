@@ -4,7 +4,7 @@ namespace Application.Common.Models;
 
 public class SearchResponseModel
 {
-    public IEnumerable<Object> Flashcards { get; set; } = new HashSet<Object>();
-    public IEnumerable<Object> Subjects { get; set; } = new HashSet<Object>();
-    public IEnumerable<Object> Documents { get; set; } = new HashSet<Object>();
+    public IEnumerable<FlashcardResponseModel> Flashcards { get; set; } = new HashSet<FlashcardResponseModel>();
+    public IEnumerable<SubjectResponseModel> Subjects { get; set; } = new HashSet<SubjectResponseModel>();
+    public IEnumerable<DocumentResponseModel> Documents { get; set; } = new HashSet<DocumentResponseModel>();
 }

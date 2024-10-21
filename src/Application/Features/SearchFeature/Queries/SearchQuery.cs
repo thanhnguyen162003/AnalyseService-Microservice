@@ -22,14 +22,31 @@ public class SearchQueryHandler : IRequestHandler<SearchQuery, object>
     public async Task<object> Handle(SearchQuery request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(request.type))
+        {
+            // Search all returns a common response
             return await _searchService.SearchAll(request.Value);
+        }
         else if (request.type == "flashcard")
-            return await _searchService.SearchFlashCard(request.Value);
+        {
+            // Return specific type for flashcard
+            IEnumerable<FlashcardResponseModel> flashcardResults = await _searchService.SearchFlashCard(request.Value);
+            return flashcardResults;
+        }
         else if (request.type == "subject")
-            return await _searchService.SearchSubject(request.Value);
+        {
+            // Return specific type for subject
+            IEnumerable<SubjectResponseModel> subjectResults = await _searchService.SearchSubject(request.Value);
+            return subjectResults;
+        }
         else if (request.type == "document")
-            return await _searchService.SearchDocument(request.Value);
+        {
+            // Return specific type for document
+            IEnumerable<DocumentResponseModel> documentResults = await _searchService.SearchDocument(request.Value);
+            return documentResults;
+        }
         else
+        {
             throw new Exception("Type not found");
+        }
     }
 }
