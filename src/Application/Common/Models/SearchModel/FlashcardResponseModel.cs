@@ -29,4 +29,20 @@ public class FlashcardResponseModel
     public string? UpdatedBy { get; set; }
 
     public int NumberOfFlashcardContent { get; set; }
+
+    public FlashcardHighlightResult? HighlightResult { get; set; }
+}
+
+public class FlashcardHighlightResult
+{
+    public FlashcardHighlightField FlashcardName { get; set; }
+    public FlashcardHighlightField FlashcardDescription { get; set; }
+}
+
+public class FlashcardHighlightField
+{
+    public string Value { get; set; }
+    public string MatchLevel { get; set; }
+    public bool FullyHighlighted { get; set; }
+    public List<string> MatchedWords { get; set; }
 }

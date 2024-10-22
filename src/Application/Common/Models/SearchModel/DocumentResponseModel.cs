@@ -21,6 +21,8 @@ public class DocumentResponseModel
     public Guid? UpdatedBy { get; set; }
     public DateTime? CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
+
+    public DocumentHighlightResult? HighlightResult { get; set; }
 }
 
 public class DocumentSubjectResponseModel
@@ -35,4 +37,18 @@ public class DocumentCategoryResponseModel
     public Guid CategoryId { get; set; }
     public string CategoryName { get; set; } = null!;
     public string CategorySlug { get; set; } = null!;
+}
+
+public class DocumentHighlightResult
+{
+    public DocumentHighlightField DocumentName { get; set; }
+    public DocumentHighlightField DocumentDescription { get; set; }
+}
+
+public class DocumentHighlightField
+{
+    public string Value { get; set; }
+    public string MatchLevel { get; set; }
+    public bool FullyHighlighted { get; set; }
+    public List<string> MatchedWords { get; set; }
 }

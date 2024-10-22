@@ -32,4 +32,19 @@ public class SubjectResponseModel
     public int? View { get; set; }
 
     public int? NumberEnrollment { get; set; }
+    public SubjectHighlightResult? HighlightResult { get; set; }
+}
+
+public class SubjectHighlightResult
+{
+    public SubjectHighlightField SubjectName { get; set; }
+    public SubjectHighlightField SubjectDescription { get; set; }
+}
+
+public class SubjectHighlightField
+{
+    public string Value { get; set; }
+    public string MatchLevel { get; set; }
+    public bool FullyHighlighted { get; set; }
+    public List<string> MatchedWords { get; set; }
 }

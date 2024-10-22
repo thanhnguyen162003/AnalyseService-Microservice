@@ -3,7 +3,11 @@ using Algolia.Search.Models.Search;
 using Application.Common.Models;
 using Application.Common.Models.SearchModel;
 using Application.Constants;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using MongoDB.Bson;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Application.Services.Search;
 
@@ -41,61 +45,94 @@ public class SearchService : ISearchService
         var documents = result.Results.ElementAt(2).AsSearchResponse().Hits;
 
         return new SearchResponseModel
-    {
-        Flashcards = flashcards.Select(hit => 
-            JsonConvert.DeserializeObject<FlashcardResponseModel>(hit.ToString())).Select(card => new FlashcardResponseModel
+        {
+            Flashcards = flashcards.Select(hit =>
             {
-                Id = card.Id,
-                Like = card.Like,
-                Slug = card.Slug,
-                Star = card.Star,
-                Status = card.Status,
-                CreatedAt = card.CreatedAt,
-                CreatedBy = card.CreatedBy,
-                FlashcardDescription = card.FlashcardDescription,
-                FlashcardName = card.FlashcardName,
-                SubjectId = card.SubjectId,
-                UpdatedAt = card.UpdatedAt,
-                UpdatedBy = card.UpdatedBy,
-                UserId = card.UserId,
-                NumberOfFlashcardContent = flashcards.Count()
+                var card = JsonConvert.DeserializeObject<FlashcardResponseModel>(hit.ToString());
+
+                var hitObj = JsonConvert.DeserializeObject<JObject>(hit.ToString());
+                if (hitObj["_highlightResult"] != null)
+                {
+                    card.HighlightResult = hitObj["_highlightResult"].ToObject<Application.Common.Models.SearchModel.FlashcardHighlightResult>();
+                }
+
+                return new FlashcardResponseModel
+                {
+                    Id = card.Id,
+                    Like = card.Like,
+                    Slug = card.Slug,
+                    Star = card.Star,
+                    Status = card.Status,
+                    CreatedAt = card.CreatedAt,
+                    CreatedBy = card.CreatedBy,
+                    FlashcardDescription = card.FlashcardDescription,
+                    FlashcardName = card.FlashcardName,
+                    SubjectId = card.SubjectId,
+                    UpdatedAt = card.UpdatedAt,
+                    UpdatedBy = card.UpdatedBy,
+                    UserId = card.UserId,
+                    NumberOfFlashcardContent = flashcards.Count(),
+                    HighlightResult = card.HighlightResult
+                };
             }),
-        Subjects = subjects.Select(hit => 
-            JsonConvert.DeserializeObject<SubjectResponseModel>(hit.ToString())).Select(subject => new SubjectResponseModel
+            Subjects = subjects.Select(hit =>
             {
-                Id = subject.Id,
-                Like = subject.Like,
-                Slug = subject.Slug,
-                CreatedAt = subject.CreatedAt,
-                UpdatedAt = subject.UpdatedAt,
-                Image = subject.Image,
-                Information = subject.Information,
-                View = subject.View,
-                CategoryName = subject.CategoryName,
-                NumberEnrollment = subject.NumberEnrollment,
-                SubjectCode = subject.SubjectCode,
-                SubjectDescription = subject.SubjectDescription,
-                SubjectName = subject.SubjectName,
-                NumberOfChapters = subject.NumberOfChapters
+                var subject = JsonConvert.DeserializeObject<SubjectResponseModel>(hit.ToString());
+
+                var hitObj = JsonConvert.DeserializeObject<JObject>(hit.ToString());
+                if (hitObj["_highlightResult"] != null)
+                {
+                    subject.HighlightResult = hitObj["_highlightResult"].ToObject<Application.Common.Models.SearchModel.SubjectHighlightResult>();
+                }
+
+                return new SubjectResponseModel
+                {
+                    Id = subject.Id,
+                    Like = subject.Like,
+                    Slug = subject.Slug,
+                    CreatedAt = subject.CreatedAt,
+                    UpdatedAt = subject.UpdatedAt,
+                    Image = subject.Image,
+                    Information = subject.Information,
+                    View = subject.View,
+                    CategoryName = subject.CategoryName,
+                    NumberEnrollment = subject.NumberEnrollment,
+                    SubjectCode = subject.SubjectCode,
+                    SubjectDescription = subject.SubjectDescription,
+                    SubjectName = subject.SubjectName,
+                    NumberOfChapters = subject.NumberOfChapters,
+                    HighlightResult = subject.HighlightResult
+                };
             }),
-        Documents = documents.Select(hit => 
-            JsonConvert.DeserializeObject<DocumentResponseModel>(hit.ToString())).Select(doc => new DocumentResponseModel
+            Documents = documents.Select(hit =>
             {
-                Id = doc.Id,
-                Like = doc.Like,
-                CreatedAt = doc.CreatedAt,
-                UpdatedAt = doc.UpdatedAt,
-                UpdatedBy = doc.UpdatedBy,
-                CreatedBy = doc.CreatedBy,
-                View = doc.View,
-                Subject = doc.Subject,
-                Download = doc.Download,
-                Category = doc.Category,
-                DocumentDescription = doc.DocumentDescription,
-                DocumentName = doc.DocumentName,
-                DocumentSlug = doc.DocumentSlug,
-                DocumentYear = doc.DocumentYear
-            }),
+                var doc = JsonConvert.DeserializeObject<DocumentResponseModel>(hit.ToString());
+
+                var hitObj = JsonConvert.DeserializeObject<JObject>(hit.ToString());
+                if (hitObj["_highlightResult"] != null)
+                {
+                    doc.HighlightResult = hitObj["_highlightResult"].ToObject<Application.Common.Models.SearchModel.DocumentHighlightResult>();
+                }
+
+                return new DocumentResponseModel
+                {
+                    Id = doc.Id,
+                    Like = doc.Like,
+                    CreatedAt = doc.CreatedAt,
+                    UpdatedAt = doc.UpdatedAt,
+                    UpdatedBy = doc.UpdatedBy,
+                    CreatedBy = doc.CreatedBy,
+                    View = doc.View,
+                    Subject = doc.Subject,
+                    Download = doc.Download,
+                    Category = doc.Category,
+                    DocumentDescription = doc.DocumentDescription,
+                    DocumentName = doc.DocumentName,
+                    DocumentSlug = doc.DocumentSlug,
+                    DocumentYear = doc.DocumentYear,
+                    HighlightResult = doc.HighlightResult
+                };
+            })
     };
 }
 
