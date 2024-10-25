@@ -3,7 +3,6 @@ using Amazon.Extensions.NETCore.Setup;
 using Amazon.S3;
 using Application;
 using Application.Common.Exceptions;
-using Application.Common.Ultils;
 using Application.Configurations;
 using Carter;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

@@ -9,12 +9,12 @@ using MongoDB.Driver;
 using Newtonsoft.Json;
 using SharedProject.Models;
 
-namespace Application.Consumer;
+namespace Application.Consumer.RetryConsumer;
 
-public class UserRoadmapGenConsumer : KafkaConsumerBase<UserDataAnalyseModel>
+public class UserRoadmapGenRetryConsumer : KafkaConsumerBase5Minutes<UserDataAnalyseModel>
 {
-    public UserRoadmapGenConsumer(IConfiguration configuration, ILogger<UserDataAnalyseConsumer> logger, IServiceProvider serviceProvider)
-        : base(configuration, logger, serviceProvider, TopicKafkaConstaints.RecommendOnboarding, "user_data_analyze_roadmap_group")
+    public UserRoadmapGenRetryConsumer(IConfiguration configuration, ILogger<UserRoadmapGenRetryConsumer> logger, IServiceProvider serviceProvider)
+        : base(configuration, logger, serviceProvider, TopicKafkaConstaints.RecommendOnboardingRetryRoadmapGen, "user_data_analyze_roadmap_group")
     {
     }
 
@@ -22,7 +22,7 @@ public class UserRoadmapGenConsumer : KafkaConsumerBase<UserDataAnalyseModel>
     {
         // var _redis = serviceProvider.GetRequiredService<IOrdinaryDistributedCache>();
         var context = serviceProvider.GetRequiredService<AnalyseDbContext>();
-        var logger = serviceProvider.GetRequiredService<ILogger<UserDataAnalyseConsumer>>();
+        var logger = serviceProvider.GetRequiredService<ILogger<UserRoadmapGenRetryConsumer>>();
         var mapper = serviceProvider.GetRequiredService<IMapper>();
         var producer = serviceProvider.GetRequiredService<IProducerService>();
         var userModel = JsonConvert.DeserializeObject<UserDataAnalyseModel>(message);

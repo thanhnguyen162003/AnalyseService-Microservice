@@ -17,6 +17,8 @@ public static class TopicKafkaConstaints
     
     //User-topic
     public const string RecommendOnboarding = "recommend_onboarding";
+    public const string RecommendOnboardingRetry = "recommend_onboarding_retry";
+    public const string RecommendOnboardingRetryRoadmapGen = "recommend_onboarding_retry_roadmap_gen";
     public const string ReportCreated = "report_created";
     public const string UserRegistered = "user_registered";
     

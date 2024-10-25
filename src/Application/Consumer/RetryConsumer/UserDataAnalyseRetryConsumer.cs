@@ -1,4 +1,3 @@
-using System.Net;
 using Application.Common.Interfaces.KafkaInterface;
 using Application.Common.Kafka;
 using Application.Constants;
@@ -9,12 +8,12 @@ using MongoDB.Driver;
 using Newtonsoft.Json;
 using SharedProject.Models;
 
-namespace Application.Consumer;
+namespace Application.Consumer.RetryConsumer;
 
-public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
+public class UserDataAnalyseRetryConsumer : KafkaConsumerBase5Minutes<UserDataAnalyseModel>
 {
-    public UserDataAnalyseConsumer(IConfiguration configuration, ILogger<UserDataAnalyseConsumer> logger, IServiceProvider serviceProvider)
-        : base(configuration, logger, serviceProvider, TopicKafkaConstaints.RecommendOnboarding, "user_data_analyze_group")
+    public UserDataAnalyseRetryConsumer(IConfiguration configuration, ILogger<UserDataAnalyseRetryConsumer> logger, IServiceProvider serviceProvider)
+        : base(configuration, logger, serviceProvider, TopicKafkaConstaints.RecommendOnboardingRetry, "user_data_analyze_group")
     {
     }
 
@@ -22,7 +21,7 @@ public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
     {
         // var _redis = serviceProvider.GetRequiredService<IOrdinaryDistributedCache>();
         var context = serviceProvider.GetRequiredService<AnalyseDbContext>();
-        var logger = serviceProvider.GetRequiredService<ILogger<UserDataAnalyseConsumer>>();
+        var logger = serviceProvider.GetRequiredService<ILogger<UserDataAnalyseRetryConsumer>>();
         var mapper = serviceProvider.GetRequiredService<IMapper>();
         var producer = serviceProvider.GetRequiredService<IProducerService>();
         var userModel = JsonConvert.DeserializeObject<UserDataAnalyseModel>(message);
@@ -89,6 +88,7 @@ public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
         }
         catch (Exception ex)
         {
+            logger.LogCritical(ex, "this consumer have retry manytime in data recommend");
             await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.RecommendOnboardingRetry, userModel.UserId.ToString(), userModel);
             logger.LogError(ex, "An error occurred while processing cache operations for key {ex}.", ex.Message);
         }
