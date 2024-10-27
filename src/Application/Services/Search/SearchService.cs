@@ -143,7 +143,7 @@ public class SearchService : ISearchService
         (
             new SearchForHits
             {
-                IndexName = IndexSearchConstant.Flashcard,
+                IndexName = IndexSearchConstant.Subject,
                 Query = value
             }
         );
