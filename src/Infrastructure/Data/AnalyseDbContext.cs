@@ -23,4 +23,6 @@ public class AnalyseDbContext
     public IMongoCollection<Roadmap> Roadmap => _database.GetCollection<Roadmap>("Roadmap");
     public IMongoCollection<UserAnalyseEntity> UserAnalyseEntity => _database.GetCollection<UserAnalyseEntity>("UserAnalyseEntity");
     public IMongoCollection<RecommendedData> RecommendedData => _database.GetCollection<RecommendedData>("RecommendedData");
+    public IMongoCollection<DocumentDay> DocumentDay => _database.GetCollection<DocumentDay>("DocumentDay");
+
 }

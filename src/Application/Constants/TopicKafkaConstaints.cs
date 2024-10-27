@@ -11,6 +11,7 @@ public static class TopicKafkaConstaints
     public const string DocumentDeleted = "document_deleted";
     public const string TheoryDeleted = "theory_deleted";
     public const string UserAnalyseData = "user_analyse_data";
+    public const string SubjectViewUpdate = "subject_view_update";
     
     //Media-topic
     public const string SubjectImageUpdated = "subject_image_updated";
