@@ -17,10 +17,10 @@ public class ProducerService : IProducerService
         var producerConfig = new ProducerConfig
         {
             BootstrapServers = _configuration["Kafka:BootstrapServers"],
-            // SaslUsername = _configuration["Kafka:SaslUsername"],
-            // SaslPassword = _configuration["Kafka:SaslPassword"],
-            // SecurityProtocol = SecurityProtocol.SaslSsl,
-            // SaslMechanism = SaslMechanism.Plain,
+            SaslUsername = _configuration["Kafka:SaslUsername"],
+            SaslPassword = _configuration["Kafka:SaslPassword"],
+            SecurityProtocol = SecurityProtocol.SaslSsl,
+            SaslMechanism = SaslMechanism.Plain,
             Acks = Acks.All,
             MessageSendMaxRetries = 3,
             CompressionType = CompressionType.Gzip,
