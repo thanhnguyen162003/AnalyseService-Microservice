@@ -19,7 +19,7 @@ public class ProducerService : IProducerService
             BootstrapServers = _configuration["Kafka:BootstrapServers"],
             SaslUsername = _configuration["Kafka:SaslUsername"],
             SaslPassword = _configuration["Kafka:SaslPassword"],
-            SecurityProtocol = SecurityProtocol.SaslSsl,
+            SecurityProtocol = SecurityProtocol.SaslPlaintext,
             SaslMechanism = SaslMechanism.Plain,
             Acks = Acks.All,
             MessageSendMaxRetries = 3,

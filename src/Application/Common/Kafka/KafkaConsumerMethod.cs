@@ -16,7 +16,7 @@ public class KafkaConsumerMethod : IKafkaConsumerMethod
             BootstrapServers = configuration["Kafka:BootstrapServers"],
             SaslUsername = configuration["Kafka:SaslUsername"],
             SaslPassword = configuration["Kafka:SaslPassword"],
-            SecurityProtocol = SecurityProtocol.SaslSsl,
+            SecurityProtocol = SecurityProtocol.SaslPlaintext,
             SaslMechanism = SaslMechanism.Plain,
             GroupId = "Quartz",
             AutoOffsetReset = AutoOffsetReset.Earliest,
