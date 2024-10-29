@@ -14,10 +14,10 @@ public class KafkaConsumerMethod : IKafkaConsumerMethod
         var consumerConfig = new ConsumerConfig
         {
             BootstrapServers = configuration["Kafka:BootstrapServers"],
-            SaslUsername = configuration["Kafka:SaslUsername"],
-            SaslPassword = configuration["Kafka:SaslPassword"],
-            SecurityProtocol = SecurityProtocol.SaslPlaintext,
-            SaslMechanism = SaslMechanism.Plain,
+            //SaslUsername = configuration["Kafka:SaslUsername"],
+            //SaslPassword = configuration["Kafka:SaslPassword"],
+            //SecurityProtocol = SecurityProtocol.SaslPlaintext,
+            //SaslMechanism = SaslMechanism.Plain,
             GroupId = "Quartz",
             AutoOffsetReset = AutoOffsetReset.Earliest,
         };
