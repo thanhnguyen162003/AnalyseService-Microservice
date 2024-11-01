@@ -36,7 +36,7 @@ public static class DependencyInjection
                 .AddJob<ProcessOutboxMessagesJob>(jobKey)
                 .AddTrigger(
                     trigger => trigger.ForJob(jobKey).WithSimpleSchedule(
-                        schedule => schedule.WithIntervalInHours(10).RepeatForever()));
+                        schedule => schedule.WithIntervalInMinutes(10).RepeatForever()));
 
             configure.UseMicrosoftDependencyInjectionJobFactory();
         });
@@ -51,7 +51,7 @@ public static class DependencyInjection
         services.AddScoped<IClaimInterface, ClaimService>();
         services.AddSingleton<IProducerService, ProducerService>();
         services.AddScoped<ICloudinaryService, CloudinaryService>();
-        services.AddSingleton<IKafkaConsumerMethod, KafkaConsumerMethod>();
+        //services.AddSingleton<IKafkaConsumerMethod, KafkaConsumerAnalyzeMethod>();
         services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddScoped<IAWSS3Service, AWSS3Service>();
         services.AddScoped<ISearchService, SearchService>();

@@ -123,54 +123,52 @@ public class ProcessOutboxMessagesJob : IJob
         foreach (UserAnalyseEntity user in userData)
         {
             // Get Kafka data
-            List<AnalyseDataDocumentModel>? data =
-                JsonConvert.DeserializeObject<List<AnalyseDataDocumentModel>>(
-                    await _consumerMethod.ConsumeByKeyAsync(topic, user.UserId.ToString(), stoppingToken));
-            
-            if (data is not null)
-            {
-                var topSubjectIds = data
-                    .Where(d => d.SubjectId.HasValue)
-                    .GroupBy(d => d.SubjectId!.Value)
-                    .Select(group => new { SubjectId = group.Key })
-                    .Take(4)
-                    .Select(x => x.SubjectId)
-                    .ToList();
-                topSubjectIds.AddRange(user.Subjects);
+            List<AnalyseDataDocumentModel>? data = await _consumerMethod.ConsumeByKeyAsync(topic, user.UserId.ToString(), stoppingToken);
 
-                var topDocumentIds = data
-                    .Where(d => d.DocumentId.HasValue)
-                    .GroupBy(d => d.DocumentId!.Value)
-                    .Select(group => new { DocumentId = group.Key, Count = group.Count() })
-                    .OrderByDescending(x => x.Count)
-                    .Take(8)
-                    .Select(x => x.DocumentId)
-                    .ToList();
-
-                var topFlashcardIds = data
-                    .Where(d => d.FlashcardId.HasValue)
-                    .GroupBy(d => d.FlashcardId!.Value)
-                    .Select(group => new { FlashcardId = group.Key, Count = group.Count() })
-                    .OrderByDescending(x => x.Count)
-                    .Take(8)
-                    .Select(x => x.FlashcardId)
-                    .ToList();
-
-                // Create the recommended data object
-                var recommendedData = new RecommendedData
+                if (data is not null)
                 {
-                    Id = ObjectId.GenerateNewId().ToString(),
-                    UserId = user.UserId,
-                    SubjectIds = topSubjectIds,
-                    DocumentIds = topDocumentIds,
-                    FlashcardIds = topFlashcardIds,
-                    Grade = user.Grade,
-                    TypeExam = user.TypeExam
-                };
-                // Add to the batch list
-                recommendedDatas.Add(recommendedData);
+                    var topSubjectIds = data
+                        .Where(d => d.SubjectId.HasValue)
+                        .GroupBy(d => d.SubjectId!.Value)
+                        .Select(group => new { SubjectId = group.Key })
+                        .Take(4)
+                        .Select(x => x.SubjectId)
+                        .ToList();
+                    topSubjectIds.AddRange(user.Subjects);
+
+                    var topDocumentIds = data
+                        .Where(d => d.DocumentId.HasValue)
+                        .GroupBy(d => d.DocumentId!.Value)
+                        .Select(group => new { DocumentId = group.Key, Count = group.Count() })
+                        .OrderByDescending(x => x.Count)
+                        .Take(8)
+                        .Select(x => x.DocumentId)
+                        .ToList();
+
+                    var topFlashcardIds = data
+                        .Where(d => d.FlashcardId.HasValue)
+                        .GroupBy(d => d.FlashcardId!.Value)
+                        .Select(group => new { FlashcardId = group.Key, Count = group.Count() })
+                        .OrderByDescending(x => x.Count)
+                        .Take(8)
+                        .Select(x => x.FlashcardId)
+                        .ToList();
+
+                    // Create the recommended data object
+                    var recommendedData = new RecommendedData
+                    {
+                        Id = ObjectId.GenerateNewId().ToString(),
+                        UserId = user.UserId,
+                        SubjectIds = topSubjectIds,
+                        DocumentIds = topDocumentIds,
+                        FlashcardIds = topFlashcardIds,
+                        Grade = user.Grade,
+                        TypeExam = user.TypeExam
+                    };
+                    // Add to the batch list
+                    recommendedDatas.Add(recommendedData);
+                }
             }
-        }
 
         // Send batch messages to Kafka
         if (recommendedDatas.Any())
