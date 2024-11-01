@@ -49,7 +49,7 @@ public abstract class KafkaConsumerAnalyseMethod : BackgroundService
                 while (!stoppingToken.IsCancellationRequested)
                 {
                     // Check if 30 minutes have elapsed
-                    if (stopwatch.ElapsedMilliseconds >= 1000 * 60 * 5)
+                     if (stopwatch.ElapsedMilliseconds >= 1000 * 60 * 5)
                     {
                         stopwatch = Stopwatch.StartNew();
                         await ProcessMessage(data, scope.ServiceProvider);
@@ -63,8 +63,10 @@ public abstract class KafkaConsumerAnalyseMethod : BackgroundService
                     
                     if (!consumeResult.Message.Key.IsNullOrEmpty())
                     {
-                        data.Add(JsonConvert.DeserializeObject<AnalyseDataDocumentModel>(consumeResult.Message.Key));
-                    }
+
+
+                    data.Add(JsonConvert.DeserializeObject<AnalyseDataDocumentModel>(consumeResult.Message.Value));
+                }
                     else
                     {
                         // Skip messages with unexpected keys

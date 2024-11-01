@@ -10,6 +10,7 @@ using Application.Common.Models.RoadmapDataModel;
 using Application.Common.Ultils;
 using Application.Consumer;
 using Application.Features.RoadmapFeature.Validators;
+using Application.Features.SubjectFeature.EventHandler;
 using Application.Infrastructure;
 using Application.Quartz;
 using Application.Services;
@@ -55,7 +56,8 @@ public static class DependencyInjection
         services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddScoped<IAWSS3Service, AWSS3Service>();
         services.AddScoped<ISearchService, SearchService>();
-        
+
+        services.AddHostedService<ConsumerAnalyseService>();
         //validator
         services.AddScoped<IValidator<RoadMapSectionCreateRequestModel>, CreateRoadmapSectionCommandValidator>();
         services.AddScoped<IValidator<RoadmapCreateRequestModel>, CreateRoadmapCommandValidator>();

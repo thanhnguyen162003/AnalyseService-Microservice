@@ -81,7 +81,19 @@ public class ConsumerAnalyseService : KafkaConsumerAnalyseMethod
                         recommendedDatas.Add(recommendedData);
                     }
                 }
+                // Send batch messages to Kafka
+                if (recommendedDatas.Any())
+                {
+                    foreach (var recommendedData in recommendedDatas)
+                    {
+                        // Send each recommended data in the batch
+                        await _producerService.ProduceObjectWithKeyAsyncBatch(TopicKafkaConstaints.DataRecommended, recommendedData.UserId.ToString(), recommendedData);
+                    }
+                    await _producerService.FlushedData(TimeSpan.FromSeconds(10));
+                    await _dbContext.RecommendedData.InsertManyAsync(recommendedDatas);
+                }
             }
+            _logger.LogInformation("Processing complete");
         }
     }
 }
