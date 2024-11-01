@@ -9,6 +9,7 @@ using Application.Common.Models;
 using Application.Common.Models.RoadmapDataModel;
 using Application.Common.Ultils;
 using Application.Consumer;
+using Application.Consumer.RetryConsumer;
 using Application.Features.RoadmapFeature.Validators;
 using Application.Infrastructure;
 using Application.Quartz;
@@ -27,6 +28,9 @@ public static class DependencyInjection
     {
         services.AddHostedService<UserDataAnalyseConsumer>();
         services.AddHostedService<UserRoadmapGenConsumer>();
+        services.AddHostedService<UserDataAnalyseRetryConsumer>();
+        services.AddHostedService<UserRoadmapGenRetryConsumer>();
+
 
         services.AddQuartz(configure =>
         {
