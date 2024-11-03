@@ -49,10 +49,10 @@ public abstract class KafkaConsumerAnalyseMethod : BackgroundService
                 while (!stoppingToken.IsCancellationRequested)
                 {
                     // Check if 30 minutes have elapsed
-                     if (stopwatch.ElapsedMilliseconds >= 1000 * 60 * 5)
+                     if (stopwatch.ElapsedMilliseconds >= 1000 * 60 * 1)
                     {
                         stopwatch = Stopwatch.StartNew();
-                        await ProcessMessage(data, scope.ServiceProvider);
+                        await ProcessMessage(data, scope.ServiceProvider,stoppingToken);
                     }
                     var consumeResult = _consumer.Consume(TimeSpan.FromMilliseconds(500));
                     if (consumeResult == null)
@@ -63,10 +63,8 @@ public abstract class KafkaConsumerAnalyseMethod : BackgroundService
                     
                     if (!consumeResult.Message.Key.IsNullOrEmpty())
                     {
-
-
-                    data.Add(JsonConvert.DeserializeObject<AnalyseDataDocumentModel>(consumeResult.Message.Value));
-                }
+                        data.Add(JsonConvert.DeserializeObject<AnalyseDataDocumentModel>(consumeResult.Message.Value));
+                    }
                     else
                     {
                         // Skip messages with unexpected keys
@@ -98,7 +96,7 @@ public abstract class KafkaConsumerAnalyseMethod : BackgroundService
             }
         
     }
-    protected abstract Task ProcessMessage(List<AnalyseDataDocumentModel> message, IServiceProvider serviceProvider);
+    protected abstract Task ProcessMessage(List<AnalyseDataDocumentModel> message, IServiceProvider serviceProvider, CancellationToken stoppingToken);
 }
 
 //Dictionary<string, int> data = await ConsumeByKeyAsync(topic, subjects, stoppingToken);
