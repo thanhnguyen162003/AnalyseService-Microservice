@@ -16,6 +16,7 @@ using Application.Services;
 using Application.Services.Search;
 using Infrastructure.Data;
 using Microsoft.OpenApi.Models;
+using Quartz;
 
 namespace Application;
 
@@ -29,11 +30,15 @@ public static class DependencyInjection
         services.AddHostedService<UserRoadmapGenRetryConsumer>();
         services.AddHostedService<ConsumerAnalyseService>();
 
+        //services.AddQuartz(configure =>
+        //{
+        //    var jobKey = new JobKey(nameof(ProcessOutboxMessagesJob));
+
         //    configure
         //        .AddJob<ProcessOutboxMessagesJob>(jobKey)
         //        .AddTrigger(
         //            trigger => trigger.ForJob(jobKey).WithSimpleSchedule(
-        //                schedule => schedule.WithIntervalInMinutes(10).RepeatForever()));
+        //                schedule => schedule.WithIntervalInHours(10).RepeatForever()));
 
         //    configure.UseMicrosoftDependencyInjectionJobFactory();
         //});
@@ -48,7 +53,6 @@ public static class DependencyInjection
         services.AddScoped<IClaimInterface, ClaimService>();
         services.AddSingleton<IProducerService, ProducerService>();
         services.AddScoped<ICloudinaryService, CloudinaryService>();
-        //services.AddSingleton<IKafkaConsumerMethod, KafkaConsumerAnalyzeMethod>();
         services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddScoped<IAWSS3Service, AWSS3Service>();
         services.AddScoped<ISearchService, SearchService>();
@@ -58,7 +62,7 @@ public static class DependencyInjection
         services.AddScoped<IValidator<RoadMapSectionCreateRequestModel>, CreateRoadmapSectionCommandValidator>();
         services.AddScoped<IValidator<RoadmapCreateRequestModel>, CreateRoadmapCommandValidator>();
         services.AddScoped(typeof(ValidationHelper<>));
-        
+
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());

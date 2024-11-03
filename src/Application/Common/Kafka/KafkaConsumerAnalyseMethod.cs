@@ -14,7 +14,6 @@ public abstract class KafkaConsumerAnalyseMethod : BackgroundService
     private readonly IConsumer<string, string> _consumer;
     private readonly ILogger<KafkaConsumerAnalyseMethod> _logger;
     private readonly IServiceProvider _serviceProvider;
-    private readonly AnalyseDbContext _dbContext;
     private readonly string _topicName;
     public KafkaConsumerAnalyseMethod(IConfiguration configuration, ILogger<KafkaConsumerAnalyseMethod> logger,
         IServiceProvider serviceProvider, string topicName, string groupId)
@@ -48,16 +47,17 @@ public abstract class KafkaConsumerAnalyseMethod : BackgroundService
 
                 while (!stoppingToken.IsCancellationRequested)
                 {
-                    // Check if 30 minutes have elapsed
-                     if (stopwatch.ElapsedMilliseconds >= 1000 * 60 * 1)
+                // Check if 30 minutes have elapsed
+                    var nowUtc7 = DateTimeOffset.Now.UtcDateTime.AddHours(7);
+                    if (nowUtc7.Hour == 0 && nowUtc7.Minute < 5)
                     {
-                        stopwatch = Stopwatch.StartNew();
+                        data.Clear();
                         await ProcessMessage(data, scope.ServiceProvider,stoppingToken);
                     }
-                    var consumeResult = _consumer.Consume(TimeSpan.FromMilliseconds(500));
+                    var consumeResult = _consumer.Consume(TimeSpan.FromSeconds(2));
                     if (consumeResult == null)
                     {
-                        continue;
+                        return;
                     }
 
                     
