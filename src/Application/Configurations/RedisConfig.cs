@@ -14,7 +14,7 @@ public static class RedisConfig
         services.AddSingleton<IOrdinaryDistributedCache>(provider =>
         {
             var options = provider.GetRequiredService<IOptions<RedisCacheOptions>>().Value;
-            options.Configuration = configuration["RedisCache:RedisConfiguration"];
+            options.Configuration = configuration["Redis:RedisConfiguration"];
             // options.InstanceName = configuration["RedisCache:RedisInstance"];
             return new OrdinaryDistributedCache(Options.Create(options));
         });

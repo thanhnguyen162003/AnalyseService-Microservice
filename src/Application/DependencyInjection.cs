@@ -8,6 +8,7 @@ using Application.Common.Models;
 using Application.Common.Models.RoadmapDataModel;
 using Application.Common.Ultils;
 using Application.Consumer;
+using Application.Consumer.RetryConsumer;
 using Application.Features.RoadmapFeature.Validators;
 using Application.Features.SubjectFeature.EventHandler;
 using Application.Infrastructure;
@@ -24,10 +25,9 @@ public static class DependencyInjection
     {
         services.AddHostedService<UserDataAnalyseConsumer>();
         services.AddHostedService<UserRoadmapGenConsumer>();
+        services.AddHostedService<UserDataAnalyseRetryConsumer>();
+        services.AddHostedService<UserRoadmapGenRetryConsumer>();
         services.AddHostedService<ConsumerAnalyseService>();
-        //services.AddQuartz(configure =>
-        //{
-        //    var jobKey = new JobKey(nameof(ProcessOutboxMessagesJob));
 
         //    configure
         //        .AddJob<ProcessOutboxMessagesJob>(jobKey)
