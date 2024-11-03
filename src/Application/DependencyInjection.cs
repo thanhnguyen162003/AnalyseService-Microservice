@@ -4,20 +4,18 @@ using Application.Common.Interfaces.AWS3ServiceInterface;
 using Application.Common.Interfaces.ClaimInterface;
 using Application.Common.Interfaces.CloudinaryInterface;
 using Application.Common.Interfaces.KafkaInterface;
-using Application.Common.Kafka;
 using Application.Common.Models;
 using Application.Common.Models.RoadmapDataModel;
 using Application.Common.Ultils;
 using Application.Consumer;
 using Application.Consumer.RetryConsumer;
 using Application.Features.RoadmapFeature.Validators;
+using Application.Features.SubjectFeature.EventHandler;
 using Application.Infrastructure;
-using Application.Quartz;
 using Application.Services;
 using Application.Services.Search;
 using Infrastructure.Data;
 using Microsoft.OpenApi.Models;
-using MongoDB.Bson.Serialization;
 using Quartz;
 
 namespace Application;
@@ -30,41 +28,41 @@ public static class DependencyInjection
         services.AddHostedService<UserRoadmapGenConsumer>();
         services.AddHostedService<UserDataAnalyseRetryConsumer>();
         services.AddHostedService<UserRoadmapGenRetryConsumer>();
+        services.AddHostedService<ConsumerAnalyseService>();
 
+        //services.AddQuartz(configure =>
+        //{
+        //    var jobKey = new JobKey(nameof(ProcessOutboxMessagesJob));
 
-        services.AddQuartz(configure =>
-        {
-            var jobKey = new JobKey(nameof(ProcessOutboxMessagesJob));
+        //    configure
+        //        .AddJob<ProcessOutboxMessagesJob>(jobKey)
+        //        .AddTrigger(
+        //            trigger => trigger.ForJob(jobKey).WithSimpleSchedule(
+        //                schedule => schedule.WithIntervalInHours(10).RepeatForever()));
 
-            configure
-                .AddJob<ProcessOutboxMessagesJob>(jobKey)
-                .AddTrigger(
-                    trigger => trigger.ForJob(jobKey).WithSimpleSchedule(
-                        schedule => schedule.WithIntervalInHours(10).RepeatForever()));
+        //    configure.UseMicrosoftDependencyInjectionJobFactory();
+        //});
 
-            configure.UseMicrosoftDependencyInjectionJobFactory();
-        });
-
-        services.AddQuartzHostedService(options =>
-        {
-            options.WaitForJobsToComplete = true;
-        });
+        //services.AddQuartzHostedService(options =>
+        //{
+        //    options.WaitForJobsToComplete = true;
+        //});
         // BsonSerializer.RegisterSerializer(typeof(ICollection<Guid>), new ICollectionGuidSerializer());
         //Inject Service, Repo, etc...
         services.AddSingleton<AnalyseDbContext>();
         services.AddScoped<IClaimInterface, ClaimService>();
         services.AddSingleton<IProducerService, ProducerService>();
         services.AddScoped<ICloudinaryService, CloudinaryService>();
-        services.AddSingleton<IKafkaConsumerMethod, KafkaConsumerMethod>();
         services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddScoped<IAWSS3Service, AWSS3Service>();
         services.AddScoped<ISearchService, SearchService>();
+
         
         //validator
         services.AddScoped<IValidator<RoadMapSectionCreateRequestModel>, CreateRoadmapSectionCommandValidator>();
         services.AddScoped<IValidator<RoadmapCreateRequestModel>, CreateRoadmapCommandValidator>();
         services.AddScoped(typeof(ValidationHelper<>));
-        
+
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
