@@ -20,6 +20,8 @@ public static class TopicKafkaConstaints
     public const string RecommendOnboarding = "recommend_onboarding";
     public const string ReportCreated = "report_created";
     public const string UserRegistered = "user_registered";
+    public const string UserRecommnedRoadmapMissed = "user_recommend_roadmap_missed";
+    public const string UserRecommnedDataMissed = "user_recommend_data_missed";
     
     //Analyse-topic
     public const string UserRoadmapCreated = "user_roadmap_created";

@@ -1,19 +1,20 @@
 using Confluent.Kafka;
 
-namespace Application.Common.Kafka;
-
-public abstract class KafkaConsumerBase5Minutes<T> : BackgroundService
+namespace Application.Common.Kafka
+{
+    public abstract class KafkaConsumerBase3Minus<T> : BackgroundService
     {
         private readonly IConsumer<string, string> _consumer;
         private readonly IServiceProvider _serviceProvider;
-        private readonly ILogger<KafkaConsumerBase5Minutes<T>> _logger;
-        private readonly string _topicName;
+        private readonly ILogger<KafkaConsumerBase3Minus<T>> _logger;
+        private readonly List<string> _topicName;
 
-        protected KafkaConsumerBase5Minutes(IConfiguration configuration, ILogger<KafkaConsumerBase5Minutes<T>> logger, IServiceProvider serviceProvider, string topicName, string groupId)
+        protected KafkaConsumerBase3Minus(IConfiguration configuration, ILogger<KafkaConsumerBase3Minus<T>> logger,
+            IServiceProvider serviceProvider, List<string> topicName, string groupId)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
-            _topicName = topicName;
+            _topicName = topicName ?? throw new ArgumentNullException(nameof(topicName));
 
             var consumerConfig = new ConsumerConfig
             {
@@ -25,21 +26,25 @@ public abstract class KafkaConsumerBase5Minutes<T> : BackgroundService
                 GroupId = groupId,
                 AutoOffsetReset = AutoOffsetReset.Earliest,
                 EnableAutoCommit = true,
-                
             };
 
             _consumer = new ConsumerBuilder<string, string>(consumerConfig).Build();
+        }
+        protected KafkaConsumerBase3Minus(IConfiguration configuration, ILogger<KafkaConsumerBase3Minus<T>> logger, IServiceProvider serviceProvider, string topicName, string groupId)
+            : this(configuration, logger, serviceProvider, new List<string> { topicName }, groupId)
+        {
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _consumer.Subscribe(_topicName);
+
             while (!stoppingToken.IsCancellationRequested)
             {
                 using var scope = _serviceProvider.CreateScope();
                 try
                 {
-                    var consumeResult = _consumer.Consume(TimeSpan.FromSeconds(5));
+                    var consumeResult = _consumer.Consume(TimeSpan.FromSeconds(2));
                     if (consumeResult != null)
                     {
                         await ProcessMessage(consumeResult.Message.Value, scope.ServiceProvider);
@@ -62,11 +67,12 @@ public abstract class KafkaConsumerBase5Minutes<T> : BackgroundService
                     _logger.LogError($"Error processing Kafka message: {ex.Message}");
                 }
 
-                await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
+                await Task.Delay(TimeSpan.FromMinutes(3), stoppingToken);
             }
             _consumer.Unsubscribe();
             _consumer.Close();
         }
-
+       
         protected abstract Task ProcessMessage(string message, IServiceProvider serviceProvider);
     }
+}

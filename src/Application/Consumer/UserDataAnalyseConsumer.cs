@@ -20,7 +20,6 @@ public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
 
     protected override async Task ProcessMessage(string message, IServiceProvider serviceProvider)
     {
-        // var _redis = serviceProvider.GetRequiredService<IOrdinaryDistributedCache>();
         var context = serviceProvider.GetRequiredService<AnalyseDbContext>();
         var logger = serviceProvider.GetRequiredService<ILogger<UserDataAnalyseConsumer>>();
         var mapper = serviceProvider.GetRequiredService<IMapper>();

@@ -69,7 +69,7 @@ namespace Application.Common.Kafka
 
                 await Task.Delay(TimeSpan.FromSeconds(3), stoppingToken);
             }
-
+            _consumer.Unsubscribe();
             _consumer.Close();
         }
        

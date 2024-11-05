@@ -64,7 +64,7 @@ public abstract class KafkaConsumerBase10Minutes<T> : BackgroundService
 
                 await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
             }
-
+            _consumer.Unsubscribe();
             _consumer.Close();
         }
 

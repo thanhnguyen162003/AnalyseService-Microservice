@@ -13,6 +13,7 @@ using Application.Features.RoadmapFeature.Validators;
 using Application.Features.SubjectFeature.EventHandler;
 using Application.Infrastructure;
 using Application.Services;
+using Application.Services.MaintainService;
 using Application.Services.Search;
 using Infrastructure.Data;
 using Microsoft.OpenApi.Models;
@@ -29,7 +30,7 @@ public static class DependencyInjection
         services.AddHostedService<UserDataAnalyseRetryConsumer>();
         services.AddHostedService<UserRoadmapGenRetryConsumer>();
         services.AddHostedService<ConsumerAnalyseService>();
-
+        // services.AddHostedService<RoadmapMissedMaintainService>();
         //services.AddQuartz(configure =>
         //{
         //    var jobKey = new JobKey(nameof(ProcessOutboxMessagesJob));

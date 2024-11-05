@@ -1,26 +1,26 @@
 using Application.Common.Interfaces.KafkaInterface;
 using Application.Common.Kafka;
 using Application.Constants;
+using Application.Consumer;
 using Application.KafkaMessageModel;
 using Domain.Entities;
 using Infrastructure.Data;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using SharedProject.Models;
 
-namespace Application.Consumer;
+namespace Application.Services.MaintainService;
 
-public class UserRoadmapGenConsumer : KafkaConsumerBase<UserDataAnalyseModel>
+public class RoadmapMissedMaintainService : KafkaConsumerBase10Minutes<UserDataAnalyseModel>
 {
-    public UserRoadmapGenConsumer(IConfiguration configuration, ILogger<UserDataAnalyseConsumer> logger, IServiceProvider serviceProvider)
-        : base(configuration, logger, serviceProvider, TopicKafkaConstaints.RecommendOnboarding, "user_data_analyze_roadmap_group")
+    public RoadmapMissedMaintainService(
+        IConfiguration configuration, ILogger<RoadmapMissedMaintainService> logger, IServiceProvider serviceProvider)
+        : base(configuration, logger, serviceProvider, TopicKafkaConstaints.UserRecommnedRoadmapMissed, "user_data_analyze_roadmap_group")
     {
     }
 
     protected override async Task ProcessMessage(string message, IServiceProvider serviceProvider)
     {
-        // var _redis = serviceProvider.GetRequiredService<IOrdinaryDistributedCache>();
         var context = serviceProvider.GetRequiredService<AnalyseDbContext>();
         var logger = serviceProvider.GetRequiredService<ILogger<UserDataAnalyseConsumer>>();
         var mapper = serviceProvider.GetRequiredService<IMapper>();
@@ -69,9 +69,7 @@ public class UserRoadmapGenConsumer : KafkaConsumerBase<UserDataAnalyseModel>
         }
         catch (Exception ex)
         {
-            await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.RecommendOnboardingRetryRoadmapGen,
-                userModel.UserId.ToString(), userModel);
-            logger.LogError(ex, "An error occurred while processing cache operations for key {ex}.", ex.Message);
+            logger.LogError(ex, "An error occurred while processing roadmap miss", ex.Message);
         }
     }
 }

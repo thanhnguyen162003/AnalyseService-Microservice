@@ -18,7 +18,7 @@ public class RoadmapEndpoints : ICarterModule
         var group = app.MapGroup("api/v1");
         group.MapPost("roadmap/detail",CreateRoadmapDetail).RequireAuthorization("moderatorPolicy").WithName(nameof(CreateRoadmapDetail));
         group.MapPost("roadmap",CreateRoadmap).RequireAuthorization("moderatorPolicy").WithName(nameof(CreateRoadmap));
-        group.MapGet("roadmap",GetRoadmapFilter).WithName(nameof(GetRoadmapFilter));
+        group.MapGet("roadmaps",GetRoadmapFilter).WithName(nameof(GetRoadmapFilter));
         group.MapGet("roadmap/{id}",GetRoadmapDetailById).WithName(nameof(GetRoadmapDetailById));
     }
 
