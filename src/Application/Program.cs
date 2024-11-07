@@ -14,6 +14,34 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddWebServices();
 builder.Services.AddControllers();
 builder.Services.AddCarter();
+
+//Grpc
+builder.Services
+    .AddGrpcClient<SubjectServiceRpc.SubjectServiceRpcClient>((services, options) =>
+    {
+        options.Address = new Uri(builder.Configuration["GRPC:SubjectService"]);
+    });
+
+builder.Services
+    .AddGrpcClient<DocumentServiceRpc.DocumentServiceRpcClient>((services, options) =>
+    {
+        options.Address = new Uri(builder.Configuration["GRPC:DocumentService"]);
+    });
+
+builder.Services
+    .AddGrpcClient<LessonServiceCheckRpc.LessonServiceCheckRpcClient>((services, options) =>
+    {
+        options.Address = new Uri(builder.Configuration["GRPC:LessonService"]);
+    });
+
+builder.Services
+    .AddGrpcClient<FlashcardServiceRpc.FlashcardServiceRpcClient>((services, options) =>
+    {
+        options.Address = new Uri(builder.Configuration["GRPC:FlashcardService"]);
+    });
+
+
+builder.Services.AddGrpc();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
