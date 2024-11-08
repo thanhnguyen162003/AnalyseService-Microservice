@@ -4,6 +4,7 @@ using Algolia.Search.Models.Search;
 using Application.Common.Interfaces.KafkaInterface;
 using Application.Common.Kafka;
 using Application.Constants;
+using Confluent.Kafka;
 using Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -16,10 +17,11 @@ namespace Application.Features.SubjectFeature.EventHandler;
 
 public class ConsumerAnalyseService : KafkaConsumerAnalyseMethod
 {
-     public ConsumerAnalyseService(IConfiguration configuration, ILogger<ConsumerAnalyseService> logger, IServiceProvider serviceProvider)
+    private readonly SubjectServiceRpc.SubjectServiceRpcClient _client;
+    public ConsumerAnalyseService(IConfiguration configuration, ILogger<ConsumerAnalyseService> logger, IServiceProvider serviceProvider, SubjectServiceRpc.SubjectServiceRpcClient client)
         : base(configuration, logger, serviceProvider, TopicKafkaConstaints.UserAnalyseData, "analyse_consumer_group")
     {
-
+        _client = client;
     }
 
     protected override async Task ProcessMessage(List<AnalyseDataDocumentModel> message, IServiceProvider serviceProvider, CancellationToken stoppingToken)
@@ -37,7 +39,28 @@ public class ConsumerAnalyseService : KafkaConsumerAnalyseMethod
             {
                 List<RecommendedData> recommendedDatasInsert = new List<RecommendedData>();
                 List<RecommendedData> recommendedDatasUpdate = new List<RecommendedData>();
-                // Process data
+                var subjectIds = message
+                            .Where(d => d.SubjectId.HasValue)
+                            .GroupBy(d => d.SubjectId!.Value)
+                            .Select(group => new { SubjectId = group.Key })
+                            .Select(x => x.SubjectId.ToString())
+                            .AsEnumerable();
+                var userIds = userData
+                            .Select(x => x.UserId.ToString())
+                            .AsEnumerable();
+                SubjectGradeRequest grade = new() 
+                { 
+                    SubjectId = subjectIds.ToString()
+                };
+                var subjectGradeResponse = await _client.GetSubjectGradeAsync(grade);
+
+                SubjectEnrollCheckRequest subjectEnrollCheckRequest = new() 
+                {
+                    SubjectId = subjectIds.ToString(),
+                    UserId = userIds.ToString()
+                };
+                var subjectEnrollResponse = await _client.GetSubjectEnrollAsync(subjectEnrollCheckRequest);
+                // Process 
                 foreach (UserAnalyseEntity user in userData)
                 {
                     if (message is not null)
@@ -137,13 +160,3 @@ public class ConsumerAnalyseService : KafkaConsumerAnalyseMethod
         }
     }
 }
-//_logger.LogError("sdkjghflksjdfhglkjsdhjfgl;jsdl;kfgjl;ksdjfg;l before" + subject.View);
-//                    subject.View += data.Count();
-//                    var update = unitOfWork.SubjectRepository.Update(subject);
-//var result = await unitOfWork.SaveChangesAsync();
-//                    if (result > 0)
-//                    {
-//                        _logger.LogError($"Update Successfully!!!", subject.Id);
-//                    }
-//                    _logger.LogError($"Update Fail!!!");
-//_logger.LogError("sdkjghflksjdfhglkjsdhjfgl;jsdl;kfgjl;ksdjfg;l after" + subject.View);

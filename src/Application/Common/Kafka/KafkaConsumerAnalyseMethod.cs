@@ -47,7 +47,7 @@ public abstract class KafkaConsumerAnalyseMethod : BackgroundService
 
                 while (!stoppingToken.IsCancellationRequested)
                 {
-                // Check if 30 minutes have elapsed
+
                     var nowUtc7 = DateTimeOffset.Now.UtcDateTime.AddHours(7);
                     if (nowUtc7.Hour == 0 && nowUtc7.Minute < 5)
                     {
@@ -61,7 +61,7 @@ public abstract class KafkaConsumerAnalyseMethod : BackgroundService
                     }
 
                     
-                    if (!consumeResult.Message.Key.IsNullOrEmpty())
+                    if (!consumeResult.Message.Value.IsNullOrEmpty())
                     {
                         data.Add(JsonConvert.DeserializeObject<AnalyseDataDocumentModel>(consumeResult.Message.Value));
                     }
