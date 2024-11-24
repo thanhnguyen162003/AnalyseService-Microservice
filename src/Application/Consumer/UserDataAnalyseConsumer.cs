@@ -1,4 +1,3 @@
-using System.Net;
 using Application.Common.Interfaces.KafkaInterface;
 using Application.Common.Kafka;
 using Application.Constants;
@@ -19,16 +18,22 @@ public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
     }
 
     protected override async Task ProcessMessage(string message, IServiceProvider serviceProvider)
+{
+    int retryCount = 0;
+    int maxRetries = 2; // Set max retry limit
+    int delayBetweenRetriesMs = 2000; // Delay between retries in milliseconds
+
+    var context = serviceProvider.GetRequiredService<AnalyseDbContext>();
+    var logger = serviceProvider.GetRequiredService<ILogger<UserDataAnalyseConsumer>>();
+    var mapper = serviceProvider.GetRequiredService<IMapper>();
+    var producer = serviceProvider.GetRequiredService<IProducerService>();
+    var userModel = JsonConvert.DeserializeObject<UserDataAnalyseModel>(message);
+    UserAnalyseEntity entity = mapper.Map<UserAnalyseEntity>(userModel);
+
+    while (retryCount < maxRetries)
     {
-        var context = serviceProvider.GetRequiredService<AnalyseDbContext>();
-        var logger = serviceProvider.GetRequiredService<ILogger<UserDataAnalyseConsumer>>();
-        var mapper = serviceProvider.GetRequiredService<IMapper>();
-        var producer = serviceProvider.GetRequiredService<IProducerService>();
-        var userModel = JsonConvert.DeserializeObject<UserDataAnalyseModel>(message);
-        UserAnalyseEntity entity = mapper.Map<UserAnalyseEntity>(userModel);
         try
         {
-            // Check if an entity with the same UserId already exists
             var existingEntity = await context.UserAnalyseEntity
                 .Find(e => e.UserId.Equals(entity.UserId))
                 .FirstOrDefaultAsync();
@@ -58,7 +63,7 @@ public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
                 await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.DataRecommended, entity.UserId.ToString(), recommendedData);
                 await context.UserAnalyseEntity.InsertOneAsync(userDataEntity);
             }
-            if (existingEntity is not null && userModel!.Address is not null && userModel.TypeExam is not null)
+            else if (existingEntity is not null && userModel!.Address is not null && userModel.TypeExam is not null)
             {
                 logger.LogInformation($"User with UserId {entity.UserId} already exists. Performing update...");
                 existingEntity.Address = entity.Address;
@@ -85,11 +90,26 @@ public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
 
                 logger.LogInformation($"UserDataAnalyse entity updated: {existingEntity.Id}");
             }
+
+            // If successful, break the loop
+            break;
         }
         catch (Exception ex)
         {
-            await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.RecommendOnboardingRetry, userModel.UserId.ToString(), userModel);
-            logger.LogError(ex, "An error occurred while processing cache operations for key {ex}.", ex.Message);
+            retryCount++;
+            logger.LogError(ex, $"Attempt {retryCount} failed while processing data for UserId {userModel.UserId}. Retrying...");
+
+            if (retryCount >= maxRetries)
+            {
+                logger.LogError(ex, $"Maximum retries reached. Sending message to retry topic for UserId {userModel.UserId}.");
+                await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.RecommendOnboardingRetry, userModel.UserId.ToString(), userModel);
+            }
+            else
+            {
+                await Task.Delay(delayBetweenRetriesMs);
+            }
         }
     }
+}
+
 }

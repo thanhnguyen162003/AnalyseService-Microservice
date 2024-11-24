@@ -30,25 +30,7 @@ public static class DependencyInjection
         services.AddHostedService<UserDataAnalyseRetryConsumer>();
         services.AddHostedService<UserRoadmapGenRetryConsumer>();
         services.AddHostedService<ConsumerAnalyseService>();
-        // services.AddHostedService<RoadmapMissedMaintainService>();
-        //services.AddQuartz(configure =>
-        //{
-        //    var jobKey = new JobKey(nameof(ProcessOutboxMessagesJob));
-
-        //    configure
-        //        .AddJob<ProcessOutboxMessagesJob>(jobKey)
-        //        .AddTrigger(
-        //            trigger => trigger.ForJob(jobKey).WithSimpleSchedule(
-        //                schedule => schedule.WithIntervalInHours(10).RepeatForever()));
-
-        //    configure.UseMicrosoftDependencyInjectionJobFactory();
-        //});
-
-        //services.AddQuartzHostedService(options =>
-        //{
-        //    options.WaitForJobsToComplete = true;
-        //});
-        // BsonSerializer.RegisterSerializer(typeof(ICollection<Guid>), new ICollectionGuidSerializer());
+        //services.AddHostedService<RoadmapMissedMaintainService>();
         //Inject Service, Repo, etc...
         services.AddSingleton<AnalyseDbContext>();
         services.AddScoped<IClaimInterface, ClaimService>();
