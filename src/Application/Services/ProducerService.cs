@@ -1,5 +1,6 @@
 using Application.Common.Interfaces.KafkaInterface;
 using Confluent.Kafka;
+using MongoDB.Driver;
 using Newtonsoft.Json;
 
 namespace Application.Services;
@@ -9,7 +10,6 @@ public class ProducerService : IProducerService
     private readonly IConfiguration _configuration;
     private readonly IProducer<string, string> _producer;
     private readonly ILogger<ProducerService> _logger;
-
     public ProducerService(IConfiguration configuration, ILogger<ProducerService> logger)
     {
         _configuration = configuration;
@@ -113,6 +113,33 @@ public class ProducerService : IProducerService
             return false;
         }
     }
+    
+    // public async Task<bool> ProduceWithRetryAsync(string topic, string key, string message, int maxRetries = 3)
+    // {
+    //     int attempt = 0;
+    //     while (attempt < maxRetries)
+    //     {
+    //         try
+    //         {
+    //             var kafkaMessage = new Message<string, string> { Key = key, Value = message };
+    //             var deliveryResult = await _producer.ProduceAsync(topic, kafkaMessage);
+    //             Console.WriteLine($"Produced message to '{deliveryResult.TopicPartitionOffset}' with key: {key}");
+    //             return true;
+    //         }
+    //         catch (ProduceException<string, string> ex)
+    //         {
+    //             _logger.LogError($"Attempt {attempt + 1} failed to deliver message with key: {key}. Error: {ex.Error.Reason}");
+    //             attempt++;
+    //         }
+    //     }
+    //
+    //     // If max retries are reached, log and persist the failed message
+    //     _logger.LogError($"Failed to deliver message with key: {key} after {maxRetries} attempts.");
+    //     // Optionally, store the message to a database or file for later reprocessing
+    //     SaveToPersistentStorage(topic, key, message);
+    //     return false;
+    // }
+
     
     public async Task FlushedData(TimeSpan timeSpan)
     {
