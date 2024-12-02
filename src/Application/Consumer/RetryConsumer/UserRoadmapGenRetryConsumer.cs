@@ -54,19 +54,27 @@ public class UserRoadmapGenRetryConsumer : KafkaConsumerBase5Minutes<UserDataAna
                     .Select(x => x.Roadmap)
                     .ToList();
                 //send back to user 1
-                var random = new Random();
-                var selectedRoadmap = matchingRoadmaps[random.Next(matchingRoadmaps.Count)];
-                RoadmapUserKafkaMessageModel messageModel = new RoadmapUserKafkaMessageModel(){
-                    RoadmapId = selectedRoadmap.Id,
-                    RoadmapName = selectedRoadmap.RoadmapName,
-                    RoadmapSubjectIds = selectedRoadmap.RoadmapSubjectIds,
-                    RoadmapDescription = selectedRoadmap.RoadmapDescription,
-                    TypeExam = selectedRoadmap.TypeExam,
-                    ContentJson = selectedRoadmap.ContentJson,
-                    RoadmapDocumentIds = selectedRoadmap.RoadmapDocumentIds,
-                    UserId = entity.UserId
-                };
-                await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.UserRoadmapGenCreated, entity.UserId.ToString(), messageModel);
+                if (matchingRoadmaps.Count > 0)
+                {
+                    var random = new Random();
+                    var selectedRoadmap = matchingRoadmaps[random.Next(matchingRoadmaps.Count)];
+                    RoadmapUserKafkaMessageModel messageModel = new RoadmapUserKafkaMessageModel(){
+                        RoadmapId = selectedRoadmap.Id,
+                        RoadmapName = selectedRoadmap.RoadmapName,
+                        RoadmapSubjectIds = selectedRoadmap.RoadmapSubjectIds,
+                        RoadmapDescription = selectedRoadmap.RoadmapDescription,
+                        TypeExam = selectedRoadmap.TypeExam,
+                        ContentJson = selectedRoadmap.ContentJson,
+                        RoadmapDocumentIds = selectedRoadmap.RoadmapDocumentIds,
+                        UserId = entity.UserId
+                    };
+                    await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.UserRoadmapGenCreated, entity.UserId.ToString(), messageModel);
+                }
+                else
+                {
+                    logger.LogWarning($"No matching roadmaps found for user {entity.UserId}.");
+                    // Handle the case where no matching roadmaps are found
+                }
             }
             
         }

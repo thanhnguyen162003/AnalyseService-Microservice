@@ -18,98 +18,97 @@ public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
     }
 
     protected override async Task ProcessMessage(string message, IServiceProvider serviceProvider)
-{
-    int retryCount = 0;
-    int maxRetries = 2; // Set max retry limit
-    int delayBetweenRetriesMs = 2000; // Delay between retries in milliseconds
-
-    var context = serviceProvider.GetRequiredService<AnalyseDbContext>();
-    var logger = serviceProvider.GetRequiredService<ILogger<UserDataAnalyseConsumer>>();
-    var mapper = serviceProvider.GetRequiredService<IMapper>();
-    var producer = serviceProvider.GetRequiredService<IProducerService>();
-    var userModel = JsonConvert.DeserializeObject<UserDataAnalyseModel>(message);
-    UserAnalyseEntity entity = mapper.Map<UserAnalyseEntity>(userModel);
-
-    while (retryCount < maxRetries)
     {
-        try
+        int retryCount = 0;
+        int maxRetries = 2; // Set max retry limit
+        int delayBetweenRetriesMs = 2000; // Delay between retries in milliseconds
+
+        var context = serviceProvider.GetRequiredService<AnalyseDbContext>();
+        var logger = serviceProvider.GetRequiredService<ILogger<UserDataAnalyseConsumer>>();
+        var mapper = serviceProvider.GetRequiredService<IMapper>();
+        var producer = serviceProvider.GetRequiredService<IProducerService>();
+        var userModel = JsonConvert.DeserializeObject<UserDataAnalyseModel>(message);
+        UserAnalyseEntity entity = mapper.Map<UserAnalyseEntity>(userModel);
+
+        while (retryCount < maxRetries)
         {
-            var existingEntity = await context.UserAnalyseEntity
-                .Find(e => e.UserId.Equals(entity.UserId))
-                .FirstOrDefaultAsync();
-            
-            if (existingEntity is null && userModel!.Address is not null && userModel.TypeExam is not null)
+            try
             {
-                string mongoId = ObjectId.GenerateNewId().ToString();
-                RecommendedData recommendedData = new RecommendedData()
-                {
-                    Id = mongoId,
-                    UserId = entity.UserId,
-                    SubjectIds = entity.Subjects,
-                    Grade = entity.Grade,
-                    TypeExam = entity.TypeExam
-                };
-                UserAnalyseEntity userDataEntity = new UserAnalyseEntity()
-                {
-                    Id = mongoId,
-                    Address = entity.Address,
-                    Grade = entity.Grade,
-                    UserId = entity.UserId,
-                    SchoolName = entity.SchoolName,
-                    Major = entity.Major,
-                    TypeExam = entity.TypeExam,
-                    Subjects = entity.Subjects
-                };
-                await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.DataRecommended, entity.UserId.ToString(), recommendedData);
-                await context.UserAnalyseEntity.InsertOneAsync(userDataEntity);
-            }
-            else if (existingEntity is not null && userModel!.Address is not null && userModel.TypeExam is not null)
-            {
-                logger.LogInformation($"User with UserId {entity.UserId} already exists. Performing update...");
-                existingEntity.Address = entity.Address;
-                existingEntity.Grade = entity.Grade;
-                existingEntity.UserId = entity.UserId;
-                existingEntity.SchoolName = entity.SchoolName;
-                existingEntity.Major = entity.Major;
-                existingEntity.TypeExam = entity.TypeExam;
-                existingEntity.Subjects = entity.Subjects;
+                var existingEntity = await context.UserAnalyseEntity
+                    .Find(e => e.UserId.Equals(entity.UserId))
+                    .FirstOrDefaultAsync();
                 
-                RecommendedData recommendedData = new RecommendedData()
+                if (existingEntity is null && userModel!.Address is not null && userModel.TypeExam is not null)
                 {
-                    UserId = entity.UserId,
-                    SubjectIds = entity.Subjects,
-                    Grade = entity.Grade,
-                    TypeExam = entity.TypeExam,
-                    Id = existingEntity.Id
-                };
-                await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.DataRecommended, entity.UserId.ToString(), recommendedData);
-                await context.UserAnalyseEntity.ReplaceOneAsync(
-                    e => e.UserId == existingEntity.UserId,
-                    existingEntity
-                );
+                    string mongoId = ObjectId.GenerateNewId().ToString();
+                    RecommendedData recommendedData = new RecommendedData()
+                    {
+                        Id = mongoId,
+                        UserId = entity.UserId,
+                        SubjectIds = entity.Subjects,
+                        Grade = entity.Grade,
+                        TypeExam = entity.TypeExam
+                    };
+                    UserAnalyseEntity userDataEntity = new UserAnalyseEntity()
+                    {
+                        Id = mongoId,
+                        Address = entity.Address,
+                        Grade = entity.Grade,
+                        UserId = entity.UserId,
+                        SchoolName = entity.SchoolName,
+                        Major = entity.Major,
+                        TypeExam = entity.TypeExam,
+                        Subjects = entity.Subjects
+                    };
+                    await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.DataRecommended, entity.UserId.ToString(), recommendedData);
+                    await context.UserAnalyseEntity.InsertOneAsync(userDataEntity);
+                }
+                else if (existingEntity is not null && userModel!.Address is not null && userModel.TypeExam is not null)
+                {
+                    logger.LogInformation($"User with UserId {entity.UserId} already exists. Performing update...");
+                    existingEntity.Address = entity.Address;
+                    existingEntity.Grade = entity.Grade;
+                    existingEntity.UserId = entity.UserId;
+                    existingEntity.SchoolName = entity.SchoolName;
+                    existingEntity.Major = entity.Major;
+                    existingEntity.TypeExam = entity.TypeExam;
+                    existingEntity.Subjects = entity.Subjects;
+                    
+                    RecommendedData recommendedData = new RecommendedData()
+                    {
+                        UserId = entity.UserId,
+                        SubjectIds = entity.Subjects,
+                        Grade = entity.Grade,
+                        TypeExam = entity.TypeExam,
+                        Id = existingEntity.Id
+                    };
+                    await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.DataRecommended, entity.UserId.ToString(), recommendedData);
+                    await context.UserAnalyseEntity.ReplaceOneAsync(
+                        e => e.UserId == existingEntity.UserId,
+                        existingEntity
+                    );
 
-                logger.LogInformation($"UserDataAnalyse entity updated: {existingEntity.Id}");
+                    logger.LogInformation($"UserDataAnalyse entity updated: {existingEntity.Id}");
+                }
+
+                // If successful, break the loop
+                break;
             }
-
-            // If successful, break the loop
-            break;
-        }
-        catch (Exception ex)
-        {
-            retryCount++;
-            logger.LogError(ex, $"Attempt {retryCount} failed while processing data for UserId {userModel.UserId}. Retrying...");
-
-            if (retryCount >= maxRetries)
+            catch (Exception ex)
             {
-                logger.LogError(ex, $"Maximum retries reached. Sending message to retry topic for UserId {userModel.UserId}.");
-                await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.RecommendOnboardingRetry, userModel.UserId.ToString(), userModel);
-            }
-            else
-            {
-                await Task.Delay(delayBetweenRetriesMs);
+                retryCount++;
+                logger.LogError(ex, $"Attempt {retryCount} failed while processing data for UserId {userModel.UserId}. Retrying...");
+
+                if (retryCount >= maxRetries)
+                {
+                    logger.LogError(ex, $"Maximum retries reached. Sending message to retry topic for UserId {userModel.UserId}.");
+                    await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.RecommendOnboardingRetry, userModel.UserId.ToString(), userModel);
+                }
+                else
+                {
+                    await Task.Delay(delayBetweenRetriesMs);
+                }
             }
         }
     }
-}
-
 }
