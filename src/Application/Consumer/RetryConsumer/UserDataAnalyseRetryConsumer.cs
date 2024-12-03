@@ -88,8 +88,8 @@ public class UserDataAnalyseRetryConsumer : KafkaConsumerBase5Minutes<UserDataAn
         }
         catch (Exception ex)
         {
-            logger.LogCritical(ex, "this consumer have retry manytime in data recommend");
-            await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.RecommendOnboardingRetry, userModel.UserId.ToString(), userModel);
+            logger.LogCritical(ex, "this consumer have retry manytime in data recommend it will go to dead letter");
+            await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.RecommendOnboardingDeadLetter, userModel.UserId.ToString(), userModel);
             logger.LogError(ex, "An error occurred while processing cache operations for key {ex}.", ex.Message);
         }
     }

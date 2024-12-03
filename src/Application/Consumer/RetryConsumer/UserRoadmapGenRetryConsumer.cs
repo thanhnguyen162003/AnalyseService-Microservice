@@ -80,7 +80,8 @@ public class UserRoadmapGenRetryConsumer : KafkaConsumerBase5Minutes<UserDataAna
         }
         catch (Exception ex)
         {
-            await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.RecommendOnboardingRetryRoadmapGen,
+            logger.LogCritical(ex, "this consumer have retry manytime in data recommend it will go to dead letter");
+            await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.RecommendOnboardingDeadLetterRoadmapGen,
                 userModel.UserId.ToString(), userModel);
             logger.LogError(ex, "An error occurred while processing cache operations for key {ex}.", ex.Message);
         }

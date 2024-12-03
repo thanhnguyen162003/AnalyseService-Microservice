@@ -26,8 +26,8 @@ public class ProducerService : IProducerService
             CompressionType = CompressionType.Gzip,
             LingerMs = 2000,
             // Adjust timeout configurations
-            MessageTimeoutMs = 30000,    // Increase to 30 seconds
-            RequestTimeoutMs = 15000,    // Increase to 15 seconds
+            MessageTimeoutMs = 10000,    // Increase to 10 seconds
+            RequestTimeoutMs = 10000,    // Increase to 10 seconds
             RetryBackoffMs = 1000,       // Keep as is
         };
         // Create the Kafka producer with string keys and values

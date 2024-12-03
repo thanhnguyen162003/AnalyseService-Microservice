@@ -44,14 +44,14 @@ namespace Application.Common.Kafka
                 using var scope = _serviceProvider.CreateScope();
                 try
                 {
-                    var consumeResult = _consumer.Consume(TimeSpan.FromSeconds(4));
+                    var consumeResult = _consumer.Consume(TimeSpan.FromSeconds(3));
                     if (consumeResult != null)
                     {
                         await ProcessMessage(consumeResult.Message.Value, scope.ServiceProvider);
                     }
                     else
                     {
-                        _logger.LogInformation("No messages available.");
+                        
                     }
                 }
                 catch (ConsumeException e)
@@ -71,6 +71,7 @@ namespace Application.Common.Kafka
             }
             _consumer.Unsubscribe();
             _consumer.Close();
+            _logger.LogInformation("Kafka consumer closed.");
         }
        
         protected abstract Task ProcessMessage(string message, IServiceProvider serviceProvider);
