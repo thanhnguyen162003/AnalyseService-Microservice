@@ -47,11 +47,7 @@ namespace Application.Common.Kafka
                     var consumeResult = _consumer.Consume(TimeSpan.FromMilliseconds(500));
                     if (consumeResult != null)
                     {
-                        await ProcessMessage(consumeResult.Message.Value, scope.ServiceProvider);
-                    }
-                    else
-                    {
-                        
+                        Task.Run(() => ProcessMessage(consumeResult.Message.Value, scope.ServiceProvider));
                     }
                 }
                 catch (ConsumeException e)
@@ -67,7 +63,7 @@ namespace Application.Common.Kafka
                     _logger.LogError($"Error processing Kafka message: {ex.Message}");
                 }
 
-                await Task.Delay(TimeSpan.FromSeconds(6), stoppingToken);
+                await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
             }
             _consumer.Unsubscribe();
             _consumer.Close();

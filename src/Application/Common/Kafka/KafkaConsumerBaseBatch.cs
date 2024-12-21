@@ -1,15 +1,21 @@
 using Confluent.Kafka;
+using System.Collections.Concurrent;
 
 namespace Application.Common.Kafka
 {
-    public abstract class KafkaConsumerBase3Minus<T> : BackgroundService
+    public abstract class KafkaConsumerBaseBatch<T> : BackgroundService
     {
         private readonly IConsumer<string, string> _consumer;
         private readonly IServiceProvider _serviceProvider;
-        private readonly ILogger<KafkaConsumerBase3Minus<T>> _logger;
+        private readonly ILogger<KafkaConsumerBaseBatch<T>> _logger;
         private readonly List<string> _topicName;
 
-        protected KafkaConsumerBase3Minus(IConfiguration configuration, ILogger<KafkaConsumerBase3Minus<T>> logger,
+        // Configuration for batch processing
+        private readonly int _batchSize = 10;
+        private readonly TimeSpan _batchTimeout = TimeSpan.FromSeconds(3); 
+        private readonly ConcurrentBag<string> _messageBatch = new();
+
+        protected KafkaConsumerBaseBatch(IConfiguration configuration, ILogger<KafkaConsumerBaseBatch<T>> logger,
             IServiceProvider serviceProvider, List<string> topicName, string groupId)
         {
             _logger = logger;
@@ -19,10 +25,6 @@ namespace Application.Common.Kafka
             var consumerConfig = new ConsumerConfig
             {
                 BootstrapServers = configuration["Kafka:BootstrapServers"],
-                //SaslUsername = configuration["Kafka:SaslUsername"],
-                //SaslPassword = configuration["Kafka:SaslPassword"],
-                //SecurityProtocol = SecurityProtocol.SaslPlaintext,
-                //SaslMechanism = SaslMechanism.Plain,
                 GroupId = groupId,
                 AutoOffsetReset = AutoOffsetReset.Earliest,
                 EnableAutoCommit = true,
@@ -30,7 +32,9 @@ namespace Application.Common.Kafka
 
             _consumer = new ConsumerBuilder<string, string>(consumerConfig).Build();
         }
-        protected KafkaConsumerBase3Minus(IConfiguration configuration, ILogger<KafkaConsumerBase3Minus<T>> logger, IServiceProvider serviceProvider, string topicName, string groupId)
+
+        protected KafkaConsumerBaseBatch(IConfiguration configuration, ILogger<KafkaConsumerBaseBatch<T>> logger, 
+            IServiceProvider serviceProvider, string topicName, string groupId)
             : this(configuration, logger, serviceProvider, new List<string> { topicName }, groupId)
         {
         }
@@ -38,6 +42,7 @@ namespace Application.Common.Kafka
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _consumer.Subscribe(_topicName);
+            var lastBatchTime = DateTime.UtcNow;
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -47,11 +52,19 @@ namespace Application.Common.Kafka
                     var consumeResult = _consumer.Consume(TimeSpan.FromMilliseconds(500));
                     if (consumeResult != null)
                     {
-                        await ProcessMessage(consumeResult.Message.Value, scope.ServiceProvider);
-                    }
-                    else
-                    {
-                        _logger.LogInformation("No messages available.");
+                        _messageBatch.Add(consumeResult.Message.Value);
+
+                        // Check if batch conditions are met
+                        if (_messageBatch.Count >= _batchSize || 
+                            DateTime.UtcNow - lastBatchTime >= _batchTimeout)
+                        {
+                            var messagesToProcess = _messageBatch.ToArray(); // Snapshot the batch
+                            _messageBatch.Clear(); // Clear for the next batch
+                            lastBatchTime = DateTime.UtcNow;
+
+                            // Process the batch asynchronously
+                            Task.Run(() => ProcessBatch(messagesToProcess, scope.ServiceProvider));
+                        }
                     }
                 }
                 catch (ConsumeException e)
@@ -67,12 +80,19 @@ namespace Application.Common.Kafka
                     _logger.LogError($"Error processing Kafka message: {ex.Message}");
                 }
 
-                await Task.Delay(TimeSpan.FromMinutes(3), stoppingToken);
+                await Task.Delay(TimeSpan.FromMilliseconds(200), stoppingToken);
             }
             _consumer.Unsubscribe();
             _consumer.Close();
+            _logger.LogInformation("Kafka consumer closed.");
         }
-       
-        protected abstract Task ProcessMessage(string message, IServiceProvider serviceProvider);
+
+        /// <summary>
+        /// Abstract method to process a batch of messages.
+        /// </summary>
+        /// <param name="messages">Batch of messages</param>
+        /// <param name="serviceProvider">Service provider for scoped dependencies</param>
+        /// <returns></returns>
+        protected abstract Task ProcessBatch(IEnumerable<string> messages, IServiceProvider serviceProvider);
     }
 }
