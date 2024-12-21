@@ -7,6 +7,7 @@ using Application.Common.Interfaces.KafkaInterface;
 using Application.Common.Models;
 using Application.Common.Models.RoadmapDataModel;
 using Application.Common.Ultils;
+using Application.Constants;
 using Application.Consumer;
 using Application.Consumer.RetryConsumer;
 using Application.Features.RoadmapFeature.Validators;
@@ -30,6 +31,7 @@ public static class DependencyInjection
         services.AddHostedService<UserDataAnalyseRetryConsumer>();
         services.AddHostedService<UserRoadmapGenRetryConsumer>();
         services.AddHostedService<ConsumerAnalyseService>();
+        services.AddHostedService<RecentViewKafkaConsumer>();
         //services.AddHostedService<RoadmapMissedMaintainService>();
         //Inject Service, Repo, etc...
         services.AddSingleton<AnalyseDbContext>();
@@ -39,7 +41,7 @@ public static class DependencyInjection
         services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddScoped<IAWSS3Service, AWSS3Service>();
         services.AddScoped<ISearchService, SearchService>();
-
+        
         
         //validator
         services.AddScoped<IValidator<RoadMapSectionCreateRequestModel>, CreateRoadmapSectionCommandValidator>();

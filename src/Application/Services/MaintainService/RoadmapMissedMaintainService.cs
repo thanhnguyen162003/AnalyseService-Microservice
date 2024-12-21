@@ -69,6 +69,7 @@ public class RoadmapMissedMaintainService : KafkaConsumerBase10Minutes<UserDataA
         }
         catch (Exception ex)
         {
+            //noti to user that fail to generate
             logger.LogError(ex, "An error occurred while processing roadmap miss", ex.Message);
         }
     }

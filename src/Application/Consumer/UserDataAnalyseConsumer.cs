@@ -10,13 +10,13 @@ using SharedProject.Models;
 
 namespace Application.Consumer;
 
-public class UserDataAnalyseConsumer : KafkaConsumerBase<UserDataAnalyseModel>
+public class UserDataAnalyseConsumer(
+    IConfiguration configuration,
+    ILogger<UserDataAnalyseConsumer> logger,
+    IServiceProvider serviceProvider)
+    : KafkaConsumerBase<UserDataAnalyseModel>(configuration, logger, serviceProvider,
+        TopicKafkaConstaints.RecommendOnboarding, "user_data_analyze_group")
 {
-    public UserDataAnalyseConsumer(IConfiguration configuration, ILogger<UserDataAnalyseConsumer> logger, IServiceProvider serviceProvider)
-        : base(configuration, logger, serviceProvider, TopicKafkaConstaints.RecommendOnboarding, "user_data_analyze_group")
-    {
-    }
-
     protected override async Task ProcessMessage(string message, IServiceProvider serviceProvider)
     {
         int retryCount = 0;
