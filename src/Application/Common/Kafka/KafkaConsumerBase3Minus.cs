@@ -44,7 +44,7 @@ namespace Application.Common.Kafka
                 using var scope = _serviceProvider.CreateScope();
                 try
                 {
-                    var consumeResult = _consumer.Consume(TimeSpan.FromSeconds(4));
+                    var consumeResult = _consumer.Consume(TimeSpan.FromMilliseconds(500));
                     if (consumeResult != null)
                     {
                         await ProcessMessage(consumeResult.Message.Value, scope.ServiceProvider);
