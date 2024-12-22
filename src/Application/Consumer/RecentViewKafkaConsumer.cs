@@ -12,62 +12,88 @@ public class RecentViewKafkaConsumer(
     IConfiguration configuration,
     ILogger<RecentViewKafkaConsumer> logger,
     IServiceProvider serviceProvider)
-    : KafkaConsumerBase<RecentViewModel>(configuration, logger, serviceProvider,
-        TopicKafkaConstaints.RecentViewCreated, "user_recent_view_group9")
+    : KafkaConsumerBaseBatch<RecentViewModel>(configuration, logger, serviceProvider,
+        TopicKafkaConstaints.RecentViewCreated, "user_recent_view_group5")
 {
-    protected override async Task ProcessMessage(string message, IServiceProvider serviceProvider)
+    protected override async Task ProcessBatch(IEnumerable<string> messages, IServiceProvider serviceProvider)
     {
-        int retryCount = 0;
-        int maxRetries = 2; // Set max retry limit
-        int delayBetweenRetriesMs = 2000; // Delay between retries in milliseconds
-
         var context = serviceProvider.GetRequiredService<AnalyseDbContext>();
         var logger = serviceProvider.GetRequiredService<ILogger<RecentViewKafkaConsumer>>();
         var mapper = serviceProvider.GetRequiredService<IMapper>();
-        var recentViewModel = JsonConvert.DeserializeObject<RecentViewModel>(message);
-        var newEntity = mapper.Map<RecentView>(recentViewModel);
+        var retryCount = 0;
+        const int maxRetries = 2; // Max retry attempts
+        const int delayBetweenRetriesMs = 2000; // Delay between retries in milliseconds
+
+        var recentViewEntities = new List<RecentView>();
+        foreach (var message in messages)
+        {
+            try
+            {
+                var recentViewModel = JsonConvert.DeserializeObject<RecentViewModel>(message);
+                var newEntity = mapper.Map<RecentView>(recentViewModel);
+                recentViewEntities.Add(newEntity);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to deserialize message. Skipping this message.");
+            }
+        }
 
         while (retryCount < maxRetries)
         {
             try
             {
-                // Check existing entries for the user
-                var userRecentViews = context.RecentViews
-                    .Find(rv => rv.UserId == newEntity.UserId)
-                    .SortByDescending(rv => rv.Time)
-                    .ToList();
-
-                // Ensure idempotency (if the same document already exists, skip)
-                if (userRecentViews.Any(rv => rv.IdDocument == newEntity.IdDocument))
+                foreach (var userIdGroup in recentViewEntities.GroupBy(e => e.UserId))
                 {
-                    logger.LogInformation($"Document {newEntity.IdDocument} for UserId {newEntity.UserId} already exists. Skipping.");
-                    return;
+                    var userId = userIdGroup.Key;
+                    var userRecentViews = context.RecentViews
+                        .Find(rv => rv.UserId == userId)
+                        .SortByDescending(rv => rv.Time)
+                        .ToList();
+
+                    var newEntities = userIdGroup
+                        .Where(newEntity => !userRecentViews.Any(rv => rv.IdDocument == newEntity.IdDocument))
+                        .ToList();
+
+                    // Remove the oldest entries if the count exceeds 9 after adding new entries
+                    var totalEntries = userRecentViews.Count + newEntities.Count;
+                    if (totalEntries > 10)
+                    {
+                        var excessCount = totalEntries - 10;
+                        var oldestEntries = userRecentViews
+                            .OrderBy(rv => rv.Time)
+                            .Take(excessCount)
+                            .ToList();
+
+                        foreach (var oldestEntry in oldestEntries)
+                        {
+                            context.RecentViews.DeleteOne(rv => rv.Id == oldestEntry.Id);
+                            logger.LogInformation($"Removed oldest entry for UserId {userId}: DocumentId {oldestEntry.IdDocument}");
+                        }
+                    }
+
+                    // Insert new entries
+                    if (newEntities.Any())
+                    {
+                        await context.RecentViews.InsertManyAsync(newEntities);
+                        foreach (var newEntity in newEntities)
+                        {
+                            logger.LogInformation($"Saved recent view for UserId {newEntity.UserId}: DocumentId {newEntity.IdDocument}");
+                        }
+                    }
                 }
 
-                // Remove the oldest entry if the count exceeds 9
-                if (userRecentViews.Count >= 10)
-                {
-                    var oldestEntry = userRecentViews.Last();
-                    context.RecentViews.DeleteOne(rv => rv.Id == oldestEntry.Id);
-                    logger.LogInformation($"Removed oldest entry for UserId {newEntity.UserId}: DocumentId {oldestEntry.IdDocument}");
-                }
-
-                // Add the new entry
-                await context.RecentViews.InsertOneAsync(newEntity);
-
-                logger.LogInformation($"Successfully saved recent view for UserId {newEntity.UserId}: DocumentId {newEntity.IdDocument}");
-
-                // Exit the retry loop after success
+                // Exit retry loop after success
                 break;
             }
             catch (Exception ex)
             {
                 retryCount++;
-                logger.LogError(ex, $"Attempt {retryCount} failed while processing data for UserId {recentViewModel.UserId}. Retrying...");
+                logger.LogError(ex, $"Attempt {retryCount} failed while processing batch. Retrying...");
 
                 if (retryCount >= maxRetries)
                 {
-                    logger.LogError(ex, $"Maximum retries reached. Sending message to retry topic for UserId {recentViewModel.UserId}.");
+                    logger.LogError(ex, "Maximum retries reached. Batch processing failed.");
                 }
                 else
                 {

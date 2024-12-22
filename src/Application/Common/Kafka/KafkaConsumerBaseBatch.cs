@@ -49,7 +49,7 @@ namespace Application.Common.Kafka
                 using var scope = _serviceProvider.CreateScope();
                 try
                 {
-                    var consumeResult = _consumer.Consume(TimeSpan.FromMilliseconds(500));
+                    var consumeResult = _consumer.Consume(TimeSpan.FromSeconds(1));
                     if (consumeResult != null)
                     {
                         _messageBatch.Add(consumeResult.Message.Value);
@@ -80,7 +80,7 @@ namespace Application.Common.Kafka
                     _logger.LogError($"Error processing Kafka message: {ex.Message}");
                 }
 
-                await Task.Delay(TimeSpan.FromMilliseconds(200), stoppingToken);
+                await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
             }
             _consumer.Unsubscribe();
             _consumer.Close();
