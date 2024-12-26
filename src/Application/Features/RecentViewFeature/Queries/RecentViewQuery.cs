@@ -23,7 +23,7 @@ public class RecentViewQueryHandler(
             var recentViews = await dbContext.RecentViews
                 .Find(rv => rv.UserId == userId)
                 .SortByDescending(rv => rv.Time)
-                .Limit(10) // Limit to 10 recent views
+                .Limit(4)
                 .ToListAsync(cancellationToken);
 
             //map

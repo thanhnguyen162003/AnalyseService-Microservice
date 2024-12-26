@@ -13,7 +13,7 @@ public class RecentViewKafkaConsumer(
     ILogger<RecentViewKafkaConsumer> logger,
     IServiceProvider serviceProvider)
     : KafkaConsumerBaseBatch<RecentViewModel>(configuration, logger, serviceProvider,
-        TopicKafkaConstaints.RecentViewCreated, "user_recent_view_group5")
+        TopicKafkaConstaints.RecentViewCreated, "user_recent_view_group")
 {
     protected override async Task ProcessBatch(IEnumerable<string> messages, IServiceProvider serviceProvider)
     {
