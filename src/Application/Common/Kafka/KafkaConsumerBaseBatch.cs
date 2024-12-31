@@ -11,7 +11,7 @@ namespace Application.Common.Kafka
         private readonly List<string> _topicName;
 
         // Configuration for batch processing
-        private readonly int _batchSize = 20;
+        private readonly int _batchSize = 30;
         private readonly TimeSpan _batchTimeout = TimeSpan.FromSeconds(3); 
         private readonly ConcurrentBag<string> _messageBatch = new();
 

@@ -37,6 +37,7 @@ public static class DependencyInjection
         services.AddSingleton<AnalyseDbContext>();
         services.AddScoped<IClaimInterface, ClaimService>();
         services.AddSingleton<IProducerService, ProducerService>();
+        services.AddSingleton<IProducerBatchService, ProducerBatchService>();
         services.AddScoped<ICloudinaryService, CloudinaryService>();
         services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddScoped<IAWSS3Service, AWSS3Service>();
