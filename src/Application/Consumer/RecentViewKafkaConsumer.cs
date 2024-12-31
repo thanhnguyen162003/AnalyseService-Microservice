@@ -52,9 +52,17 @@ public class RecentViewKafkaConsumer(
                         .SortByDescending(rv => rv.Time)
                         .ToList();
 
-                    var newEntities = userIdGroup
-                        .Where(newEntity => !userRecentViews.Any(rv => rv.IdDocument == newEntity.IdDocument))
-                        .ToList();
+                    var newEntities = userIdGroup.ToList();
+
+                    foreach (var newEntity in newEntities)
+                    {
+                        var existingEntry = userRecentViews.FirstOrDefault(rv => rv.IdDocument == newEntity.IdDocument);
+                        if (existingEntry != null)
+                        {
+                            await context.RecentViews.DeleteOneAsync(rv => rv.Id == existingEntry.Id);
+                            logger.LogInformation($"Removed old entry for UserId {userId}: DocumentId {existingEntry.IdDocument}");
+                        }
+                    }
 
                     // Remove the oldest entries if the count exceeds 9 after adding new entries
                     var totalEntries = userRecentViews.Count + newEntities.Count;
