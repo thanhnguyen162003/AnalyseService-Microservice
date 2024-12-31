@@ -23,10 +23,9 @@ public class RecentViewQueryHandler(
             var recentViews = await dbContext.RecentViews
                 .Find(rv => rv.UserId == userId)
                 .SortByDescending(rv => rv.Time)
-                .Limit(4)
+                .Limit(6)
                 .ToListAsync(cancellationToken);
-
-            //map
+            
             var response = new RecentViewResponseModel
             {
                 Items = recentViews.Select(rv => new RecentViewItem
