@@ -6,6 +6,7 @@ using Domain.Entities;
 using Infrastructure.Data;
 using MongoDB.Driver;
 using Newtonsoft.Json;
+using SharedProject.Constaints;
 using SharedProject.Models;
 
 namespace Application.Consumer;
@@ -15,7 +16,7 @@ public class UserRoadmapGenConsumer(
     ILogger<UserRoadmapGenConsumer> logger,
     IServiceProvider serviceProvider)
     : KafkaConsumerBaseBatch<UserDataAnalyseModel>(configuration, logger, serviceProvider,
-        TopicKafkaConstaints.RecommendOnboarding, "user_data_analyze_roadmap_group")
+        TopicKafkaConstaints.RecommendOnboarding, ConsumerGroup.UserDataAnalyzeRoadmapGroup)
 {
     protected override async Task ProcessBatch(IEnumerable<string> messages, IServiceProvider serviceProvider)
     {

@@ -6,6 +6,7 @@ using Infrastructure.Data;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Newtonsoft.Json;
+using SharedProject.Constaints;
 using SharedProject.Models;
 
 namespace Application.Consumer.RetryConsumer;
@@ -13,7 +14,7 @@ namespace Application.Consumer.RetryConsumer;
 public class UserDataAnalyseRetryConsumer : KafkaConsumerBase5Minutes<UserDataAnalyseModel>
 {
     public UserDataAnalyseRetryConsumer(IConfiguration configuration, ILogger<UserDataAnalyseRetryConsumer> logger, IServiceProvider serviceProvider)
-        : base(configuration, logger, serviceProvider, TopicKafkaConstaints.RecommendOnboardingRetry, "user_data_analyze_group")
+        : base(configuration, logger, serviceProvider, TopicKafkaConstaints.RecommendOnboardingRetry, ConsumerGroup.UserDataAnalyzeGroup)
     {
     }
 

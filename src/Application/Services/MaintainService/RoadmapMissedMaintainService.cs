@@ -7,18 +7,18 @@ using Domain.Entities;
 using Infrastructure.Data;
 using MongoDB.Driver;
 using Newtonsoft.Json;
+using SharedProject.Constaints;
 using SharedProject.Models;
 
 namespace Application.Services.MaintainService;
 
-public class RoadmapMissedMaintainService : KafkaConsumerBase10Minutes<UserDataAnalyseModel>
+public class RoadmapMissedMaintainService(
+    IConfiguration configuration,
+    ILogger<RoadmapMissedMaintainService> logger,
+    IServiceProvider serviceProvider)
+    : KafkaConsumerBase10Minutes<UserDataAnalyseModel>(configuration, logger, serviceProvider,
+        TopicKafkaConstaints.UserRecommnedRoadmapMissed, ConsumerGroup.UserDataAnalyzeRoadmapGroup)
 {
-    public RoadmapMissedMaintainService(
-        IConfiguration configuration, ILogger<RoadmapMissedMaintainService> logger, IServiceProvider serviceProvider)
-        : base(configuration, logger, serviceProvider, TopicKafkaConstaints.UserRecommnedRoadmapMissed, "user_data_analyze_roadmap_group")
-    {
-    }
-
     protected override async Task ProcessMessage(string message, IServiceProvider serviceProvider)
     {
         var context = serviceProvider.GetRequiredService<AnalyseDbContext>();

@@ -7,6 +7,7 @@ using Infrastructure.Data;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Newtonsoft.Json;
+using SharedProject.Constaints;
 using SharedProject.Models;
 
 namespace Application.Consumer.RetryConsumer;
@@ -14,7 +15,7 @@ namespace Application.Consumer.RetryConsumer;
 public class UserRoadmapGenRetryConsumer : KafkaConsumerBase5Minutes<UserDataAnalyseModel>
 {
     public UserRoadmapGenRetryConsumer(IConfiguration configuration, ILogger<UserRoadmapGenRetryConsumer> logger, IServiceProvider serviceProvider)
-        : base(configuration, logger, serviceProvider, TopicKafkaConstaints.RecommendOnboardingRetryRoadmapGen, "user_data_analyze_roadmap_group")
+        : base(configuration, logger, serviceProvider, TopicKafkaConstaints.RecommendOnboardingRetryRoadmapGen, ConsumerGroup.UserDataAnalyzeRoadmapGroup)
     {
     }
 

@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using SharedProject.Models;
 using MongoDB.Driver;
 using Domain.Entities;
+using SharedProject.Constaints;
 
 namespace Application.Consumer;
 
@@ -13,7 +14,7 @@ public class RecentViewKafkaConsumer(
     ILogger<RecentViewKafkaConsumer> logger,
     IServiceProvider serviceProvider)
     : KafkaConsumerBaseBatch<RecentViewModel>(configuration, logger, serviceProvider,
-        TopicKafkaConstaints.RecentViewCreated, "user_recent_view_group")
+        TopicKafkaConstaints.RecentViewCreated, ConsumerGroup.UserRecentViewGroup)
 {
     protected override async Task ProcessBatch(IEnumerable<string> messages, IServiceProvider serviceProvider)
     {
