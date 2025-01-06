@@ -13,6 +13,7 @@ public static class ScalarConfig
         
         app.MapScalarApiReference(options =>
         {
+            options.Theme = ScalarTheme.DeepSpace;
             options.EndpointPathPrefix = "/api/{documentName}";
         })
            .RequireAuthorization(options =>
