@@ -7,18 +7,15 @@ using Application.Common.Interfaces.KafkaInterface;
 using Application.Common.Models;
 using Application.Common.Models.RoadmapDataModel;
 using Application.Common.Ultils;
-using Application.Constants;
 using Application.Consumer;
 using Application.Consumer.RetryConsumer;
 using Application.Features.RoadmapFeature.Validators;
 using Application.Features.SubjectFeature.EventHandler;
 using Application.Infrastructure;
 using Application.Services;
-using Application.Services.MaintainService;
 using Application.Services.Search;
 using Infrastructure.Data;
 using Microsoft.OpenApi.Models;
-using Quartz;
 
 namespace Application;
 
@@ -58,33 +55,6 @@ public static class DependencyInjection
         });
         services.AddHttpContextAccessor();
         services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen(option =>
-        {
-            option.SwaggerDoc("v1", new OpenApiInfo { Title = "Analyse API", Version = "v1" });
-            option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            {
-                In = ParameterLocation.Header,
-                Description = "Please enter a valid token",
-                Name = "Authorization",
-                Type = SecuritySchemeType.Http,
-                BearerFormat = "JWT",
-                Scheme = "Bearer"
-            });
-            option.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type=ReferenceType.SecurityScheme,
-                            Id="Bearer"
-                        }
-                    },
-                    new string[]{}
-                }
-            });
-        });
 
         return services;
     }
