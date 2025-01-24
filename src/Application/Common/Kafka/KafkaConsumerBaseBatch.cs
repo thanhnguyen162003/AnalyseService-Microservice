@@ -25,6 +25,10 @@ namespace Application.Common.Kafka
             var consumerConfig = new ConsumerConfig
             {
                 BootstrapServers = configuration["Kafka:BootstrapServers"],
+                SaslUsername = configuration["Kafka:SaslUsername"],
+                SaslPassword = configuration["Kafka:SaslPassword"],
+                SecurityProtocol = SecurityProtocol.SaslSsl,
+                SaslMechanism = SaslMechanism.Plain,
                 GroupId = groupId,
                 AutoOffsetReset = AutoOffsetReset.Earliest,
                 EnableAutoCommit = true,
