@@ -20,6 +20,10 @@ public class ProducerBatchService : IProducerBatchService
         var producerConfig = new ProducerConfig
         {
             BootstrapServers = configuration["Kafka:BootstrapServers"],
+            SaslUsername = configuration["Kafka:SaslUsername"],
+            SaslPassword = configuration["Kafka:SaslPassword"],
+            SecurityProtocol = SecurityProtocol.SaslSsl,
+            SaslMechanism = SaslMechanism.Plain,
             Acks = Acks.All,
             CompressionType = CompressionType.Gzip,
             MessageTimeoutMs = 10000,    // Increase to 10 seconds
