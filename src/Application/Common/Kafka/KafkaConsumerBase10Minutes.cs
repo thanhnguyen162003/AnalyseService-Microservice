@@ -42,7 +42,7 @@ public abstract class KafkaConsumerBase10Minutes<T> : BackgroundService
                     var consumeResult = _consumer.Consume(TimeSpan.FromMilliseconds(500));
                     if (consumeResult != null)
                     {
-                        Task.Run(() => ProcessMessage(consumeResult.Message.Value, scope.ServiceProvider));
+                        await ProcessMessage(consumeResult.Message.Value, scope.ServiceProvider);
                     }
                     else
                     {
