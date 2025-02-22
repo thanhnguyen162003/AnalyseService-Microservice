@@ -1,15 +1,21 @@
 using Confluent.Kafka;
+using System.Collections.Concurrent;
 
 namespace Application.Common.Kafka
 {
-    public abstract class KafkaConsumerBase<T> : BackgroundService
+    public abstract class KafkaConsumerBaseBatch<T> : BackgroundService
     {
         private readonly IConsumer<string, string> _consumer;
         private readonly IServiceProvider _serviceProvider;
-        private readonly ILogger<KafkaConsumerBase<T>> _logger;
+        private readonly ILogger<KafkaConsumerBaseBatch<T>> _logger;
         private readonly List<string> _topicName;
 
-        protected KafkaConsumerBase(IConfiguration configuration, ILogger<KafkaConsumerBase<T>> logger,
+        // Configuration for batch processing
+        private readonly int _batchSize = 80;
+        private readonly TimeSpan _batchTimeout = TimeSpan.FromSeconds(3); 
+        private readonly ConcurrentBag<string> _messageBatch = new();
+
+        protected KafkaConsumerBaseBatch(IConfiguration configuration, ILogger<KafkaConsumerBaseBatch<T>> logger,
             IServiceProvider serviceProvider, List<string> topicName, string groupId)
         {
             _logger = logger;
@@ -30,7 +36,9 @@ namespace Application.Common.Kafka
 
             _consumer = new ConsumerBuilder<string, string>(consumerConfig).Build();
         }
-        protected KafkaConsumerBase(IConfiguration configuration, ILogger<KafkaConsumerBase<T>> logger, IServiceProvider serviceProvider, string topicName, string groupId)
+
+        protected KafkaConsumerBaseBatch(IConfiguration configuration, ILogger<KafkaConsumerBaseBatch<T>> logger, 
+            IServiceProvider serviceProvider, string topicName, string groupId)
             : this(configuration, logger, serviceProvider, new List<string> { topicName }, groupId)
         {
         }
@@ -38,16 +46,29 @@ namespace Application.Common.Kafka
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _consumer.Subscribe(_topicName);
+            var lastBatchTime = DateTime.UtcNow;
 
             while (!stoppingToken.IsCancellationRequested)
             {
                 using var scope = _serviceProvider.CreateScope();
                 try
                 {
-                    var consumeResult = _consumer.Consume(TimeSpan.FromMilliseconds(500));
+                    var consumeResult = _consumer.Consume(TimeSpan.FromSeconds(1));
                     if (consumeResult != null)
                     {
-                        await ProcessMessage(consumeResult.Message.Value, scope.ServiceProvider);
+                        _messageBatch.Add(consumeResult.Message.Value);
+
+                        // Check if batch conditions are met
+                        if (_messageBatch.Count >= _batchSize || 
+                            DateTime.UtcNow - lastBatchTime >= _batchTimeout)
+                        {
+                            var messagesToProcess = _messageBatch.ToArray(); // Snapshot the batch
+                            _messageBatch.Clear(); // Clear for the next batch
+                            lastBatchTime = DateTime.UtcNow;
+
+                            // Process the batch asynchronously
+                            Task.Run(() => ProcessBatch(messagesToProcess, scope.ServiceProvider));
+                        }
                     }
                 }
                 catch (ConsumeException e)
@@ -69,7 +90,13 @@ namespace Application.Common.Kafka
             _consumer.Close();
             _logger.LogInformation("Kafka consumer closed.");
         }
-       
-        protected abstract Task ProcessMessage(string message, IServiceProvider serviceProvider);
+
+        /// <summary>
+        /// Abstract method to process a batch of messages.
+        /// </summary>
+        /// <param name="messages">Batch of messages</param>
+        /// <param name="serviceProvider">Service provider for scoped dependencies</param>
+        /// <returns></returns>
+        protected abstract Task ProcessBatch(IEnumerable<string> messages, IServiceProvider serviceProvider);
     }
 }

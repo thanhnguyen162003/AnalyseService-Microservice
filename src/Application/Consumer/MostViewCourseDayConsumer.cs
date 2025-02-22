@@ -1,13 +1,14 @@
 using Application.Common.Kafka;
 using Application.Constants;
 using Infrastructure.Data;
+using SharedProject.Constaints;
 
 namespace Application.Consumer;
 
 public class MostViewCourseDayConsumer : KafkaConsumerBase<string>
 {
     public MostViewCourseDayConsumer(IConfiguration configuration, ILogger<MostViewCourseDayConsumer> logger, IServiceProvider serviceProvider)
-        : base(configuration, logger, serviceProvider, TopicKafkaConstaints.SubjectViewUpdate, "day_analyze_group")
+        : base(configuration, logger, serviceProvider, TopicKafkaConstaints.SubjectViewUpdate, ConsumerGroup.DayAnalyzeGroup)
     {
     }
 
