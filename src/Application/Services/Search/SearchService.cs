@@ -3,9 +3,6 @@ using Algolia.Search.Models.Search;
 using Application.Common.Models;
 using Application.Common.Models.SearchModel;
 using Application.Constants;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using MongoDB.Bson;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -304,4 +301,36 @@ public class SearchService : ISearchService
         });
     } 
 
+    public async Task<IEnumerable<string>> SearchName(string value)
+    {
+        // Create a search query
+        var searchQuery = new SearchQuery
+        (
+            new SearchForHits
+            {
+                IndexName = IndexSearchConstant.Name,
+                Query = value
+            }
+        );
+
+        // Search
+        var result = await _client.SearchAsync<object>(
+            new SearchMethodParams
+            {
+                Requests = new List<SearchQuery>
+                {
+                        searchQuery
+                }
+            }
+        );
+
+        var names = result.Results.ElementAt(0).AsSearchResponse().Hits;
+
+        return names.Select(hit =>
+        {
+            var doc = JsonConvert.DeserializeObject<NameResponseModel>(hit.ToString());
+
+            return doc.Name;
+        });
+    }
 }

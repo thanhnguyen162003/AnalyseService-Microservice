@@ -1,13 +1,14 @@
 ﻿using Application.Common.Models;
 using Application.Common.Models.SearchModel;
 using Application.Services.Search;
+using Domain.Enums;
 
 namespace Application.Features.SearchFeature.Queries;
 
 public record SearchQuery : IRequest<object>
 {
-    public string? type { get; init; }
-    public string Value { get; init; } = "";
+    public SearchType Type { get; set; }
+    public string? Value { get; set; }
 }
 
 public class SearchQueryHandler : IRequestHandler<SearchQuery, object>
@@ -21,32 +22,36 @@ public class SearchQueryHandler : IRequestHandler<SearchQuery, object>
 
     public async Task<object> Handle(SearchQuery request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(request.type))
+        request.Value = request.Value ?? string.Empty;
+        if (request.Type == SearchType.All)
         {
             // Search all returns a common response
             return await _searchService.SearchAll(request.Value);
         }
-        else if (request.type == "flashcard")
+        else if (request.Type == SearchType.Flashcard)
         {
             // Return specific type for flashcard
             IEnumerable<FlashcardResponseModel> flashcardResults = await _searchService.SearchFlashCard(request.Value);
             return flashcardResults;
         }
-        else if (request.type == "subject")
+        else if (request.Type == SearchType.Subject)
         {
             // Return specific type for subject
             IEnumerable<SubjectResponseModel> subjectResults = await _searchService.SearchSubject(request.Value);
             return subjectResults;
         }
-        else if (request.type == "document")
+        else if (request.Type == SearchType.Document)
         {
             // Return specific type for document
             IEnumerable<DocumentResponseModel> documentResults = await _searchService.SearchDocument(request.Value);
             return documentResults;
-        }
-        else
+        } else if (request.Type == SearchType.name)
         {
-            throw new Exception("Type not found");
+            // Return specific type for name
+            IEnumerable<string> nameResults = await _searchService.SearchName(request.Value);
+            return nameResults;
         }
+
+        return new List<object>();
     }
 }
