@@ -50,7 +50,7 @@ public class SearchQueryHandler : IRequestHandler<SearchQuery, object>
             IEnumerable<DocumentResponseModel> documentResults = await _searchService.SearchDocument(request.Value);
 
             return documentResults;
-        } else if (request.Type == SearchType.name)
+        } else if (request.Type == SearchType.Name)
         {
             // Return specific type for name
             IEnumerable<string> nameResults = await _searchService.SearchName(request.Value);
