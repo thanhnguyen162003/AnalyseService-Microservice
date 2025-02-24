@@ -14,5 +14,7 @@ public enum SearchType
     Flashcard = 1,
     Subject = 2,
     Document = 3,
-    name = 4
+    Name = 4,
+    Folder = 5,
+    News = 6
 }
