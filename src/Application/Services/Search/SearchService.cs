@@ -23,20 +23,20 @@ public class SearchService : ISearchService
         _mapper = mapper;
     }
 
-    public async Task<SearchResponseModel> SearchAll(string value)
+    public async Task<SearchResponseModel> SearchAll(string value, int page, int eachPage)
     {
 
         return new SearchResponseModel
         {
-            Flashcards = await SearchFlashCard(value),
-            Subjects = await SearchSubject(value),
-            Documents = await SearchDocument(value),
-            Folders = await SearchFolder(value),
-            Tips = await SearchTips(value)
+            Flashcards = await SearchFlashCard(value, page, eachPage),
+            Subjects = await SearchSubject(value, page, eachPage),
+            Documents = await SearchDocument(value, page, eachPage),
+            Folders = await SearchFolder(value, page, eachPage),
+            Tips = await SearchTips(value, page, eachPage)
         };
     }
 
-    public async Task<IEnumerable<SubjectResponseModel>> SearchSubject(string value)
+    public async Task<IEnumerable<SubjectResponseModel>> SearchSubject(string value, int page, int eachPage)
     {
         // Create a search query
         var searchQuery = new SearchQuery
@@ -44,7 +44,9 @@ public class SearchService : ISearchService
             new SearchForHits
             {
                 IndexName = IndexSearchConstant.Subject,
-                Query = value
+                Query = value,
+                Page = page,
+                HitsPerPage = eachPage
             }
         );
 
@@ -92,7 +94,7 @@ public class SearchService : ISearchService
             });
     }
 
-    public async Task<IEnumerable<DocumentResponseModel>> SearchDocument(string value)
+    public async Task<IEnumerable<DocumentResponseModel>> SearchDocument(string value, int page, int eachPage)
     {
         // Create a search query
         var searchQuery = new SearchQuery
@@ -100,7 +102,9 @@ public class SearchService : ISearchService
             new SearchForHits
             {
                 IndexName = IndexSearchConstant.Document,
-                Query = value
+                Query = value,
+                Page = page,
+                HitsPerPage = eachPage
             }
         );
 
@@ -148,7 +152,7 @@ public class SearchService : ISearchService
         });
     }
 
-    public async Task<IEnumerable<FlashcardResponseModel>> SearchFlashCard(string value)
+    public async Task<IEnumerable<FlashcardResponseModel>> SearchFlashCard(string value, int page, int eachPage)
     {
         // Create a search query
         var searchQuery = new SearchQuery
@@ -156,7 +160,9 @@ public class SearchService : ISearchService
             new SearchForHits
             {
                 IndexName = IndexSearchConstant.Flashcard,
-                Query = value
+                Query = value,
+                Page = page,
+                HitsPerPage = eachPage
             }
         );
 
@@ -237,7 +243,7 @@ public class SearchService : ISearchService
         });
     }
 
-    public async Task<IEnumerable<FolderUserResponse>> SearchFolder(string value)
+    public async Task<IEnumerable<FolderUserResponse>> SearchFolder(string value, int page, int eachPage)
     {
         // Create a search query
         var searchQuery = new SearchQuery
@@ -245,7 +251,9 @@ public class SearchService : ISearchService
             new SearchForHits
             {
                 IndexName = IndexSearchConstant.Folder,
-                Query = value
+                Query = value,
+                Page = page,
+                HitsPerPage = eachPage
             }
         );
 
@@ -270,7 +278,7 @@ public class SearchService : ISearchService
         });
     }
 
-    public async Task<IEnumerable<NewsPreviewResponseModel>> SearchTips(string value)
+    public async Task<IEnumerable<NewsPreviewResponseModel>> SearchTips(string value, int page, int eachPage)
     {
         // Create a search query
         var searchQuery = new SearchQuery
@@ -278,7 +286,9 @@ public class SearchService : ISearchService
             new SearchForHits
             {
                 IndexName = IndexSearchConstant.News,
-                Query = value
+                Query = value,
+                Page = page,
+                HitsPerPage = eachPage
             }
         );
 
