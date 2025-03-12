@@ -22,7 +22,8 @@ builder.Services.AddCors(options =>
             builder.AllowAnyOrigin()
                 .AllowAnyMethod()
                 .AllowAnyHeader()
-                .WithExposedHeaders("Location", "X-Pagination");
+                .WithExposedHeaders("Location", "X-Pagination", "X-Flashcards-Pagination", "X-Subjects-Pagination",
+                "X-Documents-Pagination", "X-Tips-Pagination", "X-Folders-Pagination", "X-Names-Pagination");
         });
 });
 // Register Redis cache
