@@ -28,18 +28,7 @@ public class SearchEndpoints : ICarterModule
             return JsonHelper.Json(result);
         } else
         {
-            var title = searchQuery.Type switch
-            {
-                SearchType.Flashcard => "X-Flashcards-Pagination",
-                SearchType.Subject => "X-Subjects-Pagination",
-                SearchType.Document => "X-Documents-Pagination",
-                SearchType.News => "X-Tips-Pagination",
-                SearchType.Folder => "X-Folders-Pagination",
-                SearchType.Name => "X-Names-Pagination",
-                _ => throw new ArgumentOutOfRangeException()
-            };
-
-            context.Response.Headers.Append(title, JsonConvert.SerializeObject(new Metadata()
+            context.Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(new Metadata()
             {
                 CurrentPage = searchQuery.PageNumber + 1,
                 PageSize = searchQuery.PageSize,
