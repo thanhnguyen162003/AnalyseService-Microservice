@@ -284,91 +284,90 @@ namespace Application.Common.Kafka
         {
             if (_messageBatch.IsEmpty)
                 return;
-                
+                    
             // Take a snapshot of the current batch
             var messages = _messageBatch.ToArray();
             _messageBatch.Clear();
-            
+                
             // Wait for a processing slot
             await _batchProcessingSemaphore.WaitAsync(stoppingToken);
-            
-            // Process the batch
-            _ = Task.Run(async () =>
+                
+            try
             {
-                using var scope = _serviceProvider.CreateScope();
-                try
-                {
-                    _batchStopwatch.Restart();
+                _batchStopwatch.Restart();
                     
-                    // Process with resilience policies
-                    await _retryPolicy.WrapAsync(_circuitBreakerPolicy).ExecuteAsync(async () =>
-                    {
-                        await ProcessBatch(messages, scope.ServiceProvider);
+                // Process with resilience policies
+                await _retryPolicy.WrapAsync(_circuitBreakerPolicy).ExecuteAsync(async () =>
+                {
+                    // Create a new scope for each execution attempt
+                    using var scope = _serviceProvider.CreateScope();
+                    var scopedProvider = scope.ServiceProvider;
+                    
+                    await ProcessBatch(messages, scopedProvider);
                         
-                        // Reset consecutive failures on success
-                        Interlocked.Exchange(ref _consecutiveFailures, 0);
-                    });
+                    // Reset consecutive failures on success
+                    Interlocked.Exchange(ref _consecutiveFailures, 0);
+                });
                     
-                    _batchStopwatch.Stop();
+                _batchStopwatch.Stop();
                     
-                    // Update metrics
-                    _lastSuccessfulBatchProcess = DateTime.UtcNow;
-                    var messageCount = messages.Length;
-                    var batchTime = _batchStopwatch.ElapsedMilliseconds;
+                // Update metrics
+                _lastSuccessfulBatchProcess = DateTime.UtcNow;
+                var messageCount = messages.Length;
+                var batchTime = _batchStopwatch.ElapsedMilliseconds;
                     
-                    Interlocked.Add(ref _totalMessagesProcessed, messageCount);
-                    Interlocked.Increment(ref _totalBatchesProcessed);
+                Interlocked.Add(ref _totalMessagesProcessed, messageCount);
+                Interlocked.Increment(ref _totalBatchesProcessed);
                     
-                    // Update rolling average processing time
-                    var currentBatchCount = Interlocked.Read(ref _totalBatchesProcessed);
-                    if (currentBatchCount == 1)
-                    {
-                        _averageProcessingTimeMs = batchTime;
-                    }
-                    else
-                    {
-                        _averageProcessingTimeMs = (_averageProcessingTimeMs * (currentBatchCount - 1) + batchTime) / currentBatchCount;
-                    }
-                    
-                    _logger.LogInformation(
-                        $"Batch processed: {messageCount} messages in {batchTime}ms " +
-                        $"(avg: {batchTime / (double)messageCount:F2}ms per message) " +
-                        $"Total: {_totalMessagesProcessed} messages in {_totalBatchesProcessed} batches " +
-                        $"(avg batch size: {_totalMessagesProcessed / (double)_totalBatchesProcessed:F2})");
-                }
-                catch (BrokenCircuitException ex)
+                // Update rolling average processing time
+                var currentBatchCount = Interlocked.Read(ref _totalBatchesProcessed);
+                if (currentBatchCount == 1)
                 {
-                    Interlocked.Increment(ref _failedBatches);
-                    _logger.LogError($"Circuit broken, batch processing suspended: {ex.Message}");
-                    
-                    // When circuit breaks, don't retry these messages immediately
-                    // They could be requeued when circuit resets if needed
+                    _averageProcessingTimeMs = batchTime;
                 }
-                catch (Exception ex)
+                else
                 {
-                    Interlocked.Increment(ref _failedBatches);
-                    var failures = Interlocked.Increment(ref _consecutiveFailures);
+                    _averageProcessingTimeMs = (_averageProcessingTimeMs * (currentBatchCount - 1) + batchTime) / currentBatchCount;
+                }
                     
-                    _logger.LogError($"Error processing batch (failure {failures}/{_options.MaxConsecutiveFailures}): {ex.Message}");
+                _logger.LogInformation(
+                    $"Batch processed: {messageCount} messages in {batchTime}ms " +
+                    $"(avg: {batchTime / (double)messageCount:F2}ms per message) " +
+                    $"Total: {_totalMessagesProcessed} messages in {_totalBatchesProcessed} batches " +
+                    $"(avg batch size: {_totalMessagesProcessed / (double)_totalBatchesProcessed:F2})");
+            }
+            catch (BrokenCircuitException ex)
+            {
+                Interlocked.Increment(ref _failedBatches);
+                _logger.LogError($"Circuit broken, batch processing suspended: {ex.Message}");
                     
-                    // Consider adding the messages back to the batch if they should be retried
-                    // Only if we haven't hit the circuit breaker threshold
-                    if (failures < _options.MaxConsecutiveFailures)
+                // When circuit breaks, don't retry these messages immediately
+                // They could be requeued when circuit resets if needed
+            }
+            catch (Exception ex)
+            {
+                Interlocked.Increment(ref _failedBatches);
+                var failures = Interlocked.Increment(ref _consecutiveFailures);
+                    
+                _logger.LogError($"Error processing batch (failure {failures}/{_options.MaxConsecutiveFailures}): {ex.Message}");
+                    
+                // Consider adding the messages back to the batch if they should be retried
+                // Only if we haven't hit the circuit breaker threshold
+                if (failures < _options.MaxConsecutiveFailures)
+                {
+                    _logger.LogWarning($"Requeuing {messages.Length} messages for retry");
+                    foreach (var message in messages)
                     {
-                        _logger.LogWarning($"Requeuing {messages.Length} messages for retry");
-                        foreach (var message in messages)
-                        {
-                            _messageBatch.Add(message);
-                        }
+                        _messageBatch.Add(message);
                     }
                 }
-                finally
-                {
-                    _batchProcessingSemaphore.Release();
-                }
-            }, stoppingToken);
+            }
+            finally
+            {
+                _batchProcessingSemaphore.Release();
+            }
         }
-private void CommitOffsets(object state)
+        private void CommitOffsets(object state)
         {
             Dictionary<TopicPartition, ConsumeResult<string, string>> offsetsToCommit;
             

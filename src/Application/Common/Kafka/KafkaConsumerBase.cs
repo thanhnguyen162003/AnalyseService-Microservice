@@ -65,50 +65,73 @@ namespace Application.Common.Kafka
                 })
                 .Build();
         }
-
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
             _consumer.Subscribe(_topicName);
             _logger.LogInformation($"Subscribed to topic: {_topicName}");
             
+            // Track currently running tasks
+            var runningTasks = new List<Task>();
+            
+            // Periodically clean up completed tasks
+            using var cleanupTimer = new Timer(_ => 
+            {
+                lock (runningTasks)
+                {
+                    runningTasks.RemoveAll(t => t.IsCompleted);
+                }
+            }, null, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(30));
+            
             while (!stoppingToken.IsCancellationRequested)
             {
-                using var scope = _serviceProvider.CreateScope();
                 try
                 {
+                    // Check if we're at capacity
+                    if (runningTasks.Count >= _throttler.CurrentCount * 2)
+                    {
+                        _logger.LogWarning($"Task queue is full ({runningTasks.Count} running tasks). Pausing consumption.");
+                        await Task.Delay(TimeSpan.FromMilliseconds(500), stoppingToken);
+                        continue;
+                    }
+                    
                     var consumeResult = _consumer.Consume(TimeSpan.FromSeconds(1));
                     if (consumeResult != null)
                     {
                         _lastSuccessfulConsume = DateTime.UtcNow;
                         
-                        // Wait for a processing slot using the throttler
-                        await _throttler.WaitAsync(stoppingToken);
+                        // Wait for a processing slot using the throttler with a timeout
+                        bool acquired = await _throttler.WaitAsync(TimeSpan.FromSeconds(5), stoppingToken);
+                        
+                        if (!acquired)
+                        {
+                            _logger.LogWarning("Failed to acquire processing slot after timeout. Requeuing message.");
+                            continue;
+                        }
                         
                         // Process the message with controlled parallelism
                         var processTask = Task.Run(async () => 
                         {
                             try 
                             {
+                                using var scope = _serviceProvider.CreateScope();
                                 _processingStopwatch.Restart();
                                 
                                 // Process with retry logic
                                 await ProcessMessageWithRetryAsync(consumeResult.Message.Value, scope.ServiceProvider);
                                 
                                 _processingStopwatch.Stop();
-                                
-                                // Track metrics
                                 Interlocked.Increment(ref _totalMessagesProcessed);
                                 
-                                // Log processing completion
                                 if (_totalMessagesProcessed % 100 == 0)
                                 {
                                     _logger.LogInformation(
                                         $"Processed {_totalMessagesProcessed} messages total, " +
-                                        $"last message processed in {_processingStopwatch.ElapsedMilliseconds}ms");
+                                        $"last message processed in {_processingStopwatch.ElapsedMilliseconds}ms, " +
+                                        $"active tasks: {runningTasks.Count}, " +
+                                        $"available slots: {_throttler.CurrentCount}");
                                 }
                                 
-                                // Commit the offset after successful processing
                                 try
                                 {
                                     _consumer.Commit(consumeResult);
@@ -128,6 +151,12 @@ namespace Application.Common.Kafka
                                 _throttler.Release();
                             }
                         }, stoppingToken);
+                        
+                        // Track the task
+                        lock (runningTasks)
+                        {
+                            runningTasks.Add(processTask);
+                        }
                     }
                 }
                 catch (ConsumeException e)
@@ -146,7 +175,23 @@ namespace Application.Common.Kafka
                 }
             }
             
-            // Clean shutdown
+            // Wait for all tasks to complete on shutdown
+            _logger.LogInformation("Waiting for all processing tasks to complete...");
+            try
+            {
+                Task[] tasksToWait;
+                lock (runningTasks)
+                {
+                    tasksToWait = runningTasks.ToArray();
+                }
+                
+                await Task.WhenAll(tasksToWait);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error waiting for tasks to complete: {ex.Message}");
+            }
+            
             try
             {
                 _consumer.Unsubscribe();
@@ -157,7 +202,97 @@ namespace Application.Common.Kafka
             {
                 _logger.LogError($"Error during consumer shutdown: {ex.Message}");
             }
-        }
+        }                                   
+        // protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        // {
+        //     await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+        //     _consumer.Subscribe(_topicName);
+        //     _logger.LogInformation($"Subscribed to topic: {_topicName}");
+        //     
+        //     while (!stoppingToken.IsCancellationRequested)
+        //     {
+        //         try
+        //         {
+        //             var consumeResult = _consumer.Consume(TimeSpan.FromSeconds(1));
+        //             if (consumeResult != null)
+        //             {
+        //                 _lastSuccessfulConsume = DateTime.UtcNow;
+        //                 
+        //                 // Wait for a processing slot using the throttler
+        //                 await _throttler.WaitAsync(stoppingToken);
+        //                 
+        //                 // Process the message with controlled parallelism
+        //                 _ = Task.Run(async () => 
+        //                 {
+        //                     using var scope = _serviceProvider.CreateScope();
+        //                     try 
+        //                     {
+        //                         _processingStopwatch.Restart();
+        //                         
+        //                         await ProcessMessageWithRetryAsync(consumeResult.Message.Value, scope.ServiceProvider);
+        //                         
+        //                         _processingStopwatch.Stop();
+        //                         
+        //                         // Track metrics
+        //                         Interlocked.Increment(ref _totalMessagesProcessed);
+        //                         
+        //                         // Log processing completion
+        //                         if (_totalMessagesProcessed % 100 == 0)
+        //                         {
+        //                             _logger.LogInformation(
+        //                                 $"Processed {_totalMessagesProcessed} messages total, " +
+        //                                 $"last message processed in {_processingStopwatch.ElapsedMilliseconds}ms");
+        //                         }
+        //                         
+        //                         // Commit the offset after successful processing
+        //                         try
+        //                         {
+        //                             _consumer.Commit(consumeResult);
+        //                         }
+        //                         catch (Exception ex)
+        //                         {
+        //                             _logger.LogError($"Error committing offset: {ex.Message}");
+        //                         }
+        //                     }
+        //                     catch (Exception ex)
+        //                     {
+        //                         Interlocked.Increment(ref _failedMessages);
+        //                         _logger.LogError($"Error processing message: {ex.Message}");
+        //                     }
+        //                     finally 
+        //                     {
+        //                         _throttler.Release();
+        //                     }
+        //                 }, stoppingToken);
+        //             }
+        //         }
+        //         catch (ConsumeException e)
+        //         {
+        //             _logger.LogError($"Consume error: {e.Error.Reason}");
+        //         }
+        //         catch (OperationCanceledException)
+        //         {
+        //             _logger.LogInformation("Kafka consumption was canceled.");
+        //             break;
+        //         }
+        //         catch (Exception ex)
+        //         {
+        //             _logger.LogError($"Error in consumer loop: {ex.Message}");
+        //             await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+        //         }
+        //     }
+        //     
+        //     try
+        //     {
+        //         _consumer.Unsubscribe();
+        //         _consumer.Close();
+        //         _logger.LogInformation("Kafka consumer closed gracefully.");
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         _logger.LogError($"Error during consumer shutdown: {ex.Message}");
+        //     }
+        // }
 
         protected abstract Task ProcessMessage(string message, IServiceProvider serviceProvider);
         
@@ -165,12 +300,14 @@ namespace Application.Common.Kafka
         {
             int retryCount = 0;
             const int maxRetries = 3;
-            
+    
             while (true)
             {
                 try
                 {
-                    await ProcessMessage(message, serviceProvider);
+                    // Create a new scope for each retry attempt
+                    using var retryScope = serviceProvider.CreateScope();
+                    await ProcessMessage(message, retryScope.ServiceProvider);
                     return; // Success
                 }
                 catch (Exception ex)
@@ -180,7 +317,7 @@ namespace Application.Common.Kafka
                         _logger.LogError($"Failed to process message after {maxRetries} attempts. Error: {ex.Message}");
                         throw; // Rethrow after max retries
                     }
-                    
+            
                     var delay = TimeSpan.FromSeconds(Math.Pow(2, retryCount)); // Exponential backoff
                     _logger.LogWarning($"Retry {retryCount}/{maxRetries} after {delay.TotalSeconds}s. Error: {ex.Message}");
                     await Task.Delay(delay);
@@ -188,11 +325,9 @@ namespace Application.Common.Kafka
             }
         }
         
-        // Health check method
         public bool IsHealthy() => 
             _isHealthy && DateTime.UtcNow - _lastSuccessfulConsume < TimeSpan.FromMinutes(5);
-            
-        // Get consumer metrics
+        
         public ConsumerMetrics GetMetrics() => new ConsumerMetrics
         {
             MessagesProcessed = _totalMessagesProcessed,
