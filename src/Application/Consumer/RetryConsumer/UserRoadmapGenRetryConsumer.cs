@@ -12,7 +12,7 @@ using SharedProject.Models;
 
 namespace Application.Consumer.RetryConsumer;
 
-public class UserRoadmapGenRetryConsumer : KafkaConsumerBase5Minutes<UserDataAnalyseModel>
+public class UserRoadmapGenRetryConsumer : KafkaConsumerBase<UserDataAnalyseModel>
 {
     public UserRoadmapGenRetryConsumer(IConfiguration configuration, ILogger<UserRoadmapGenRetryConsumer> logger, IServiceProvider serviceProvider)
         : base(configuration, logger, serviceProvider, TopicKafkaConstaints.RecommendOnboardingRetryRoadmapGen, ConsumerGroup.UserDataAnalyzeRoadmapGroup)

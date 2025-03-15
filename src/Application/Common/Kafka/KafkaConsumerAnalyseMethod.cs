@@ -98,23 +98,3 @@ public abstract class KafkaConsumerAnalyseMethod : BackgroundService
     }
     protected abstract Task ProcessMessage(List<AnalyseDataDocumentModel> message, IServiceProvider serviceProvider, CancellationToken stoppingToken);
 }
-
-//Dictionary<string, int> data = await ConsumeByKeyAsync(topic, subjects, stoppingToken);
-//if (data is not null)
-//{
-//    foreach (var item in data)
-//    {
-//        if (item.Value > 0)
-//        {
-//            Guid subjectId = Guid.Parse(item.Key);
-//            var subject = await unitOfWork.SubjectRepository.Get(filter: x => x.Id == subjectId);
-//            var subjectUpdateData = _mapper.Map<Subject>(subject.FirstOrDefault());
-//            subjectUpdateData.View += item.Value;
-//            var result = await unitOfWork.SubjectRepository.UpdateSubject(subjectUpdateData, stoppingToken);
-//            if (result is false)
-//            {
-//                _logger.LogError("Update Fail" + subjectUpdateData.Id);
-//            }
-//        }
-//    }
-//}
