@@ -6,6 +6,7 @@ using Infrastructure.Data;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Newtonsoft.Json;
+using SharedProject.Constaints;
 using SharedProject.Models;
 
 namespace Application.Consumer;
@@ -15,7 +16,7 @@ public class UserDataAnalyseConsumer(
     ILogger<UserDataAnalyseConsumer> logger,
     IServiceProvider serviceProvider)
     : KafkaConsumerBaseBatch<UserDataAnalyseModel>(configuration, logger, serviceProvider,
-        TopicKafkaConstaints.RecommendOnboarding, "ConsumerGroup.UserDataAnalyzeGroup")
+        TopicKafkaConstaints.RecommendOnboarding, ConsumerGroup.UserDataAnalyzeGroup)
 {
     protected override async Task ProcessBatch(IEnumerable<string> messages, IServiceProvider serviceProvider)
     {
