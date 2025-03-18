@@ -15,7 +15,7 @@ public class UserAnalyseFlashcardMessageModel
     public DayOfWeek? DayOfWeek { get; set; } 
 }
 
-public abstract class UserAnalyseDataModel
+public class UserAnalyseDataModel
 {
     public Guid? FlashcardId { get; set; }
     public List<Guid>? FlashcardContentIdRight { get; set; }
@@ -35,7 +35,7 @@ public abstract class UserAnalyseDataModel
     public double? EaseFactor { get; set; }  // Hệ số dễ dàng (trong thuật toán SM-2)
     public int? IntervalDays { get; set; }  // Khoảng thời gian giữa các lần ôn tập (ngày)
 }
-public abstract class UserAnalyseDataModelLearning
+public class UserAnalyseDataModelLearning
 {
     public Guid? FlashcardId { get; set; }
     public List<Guid>? FlashcardContentIdRight { get; set; }
