@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package Application;
+
+message UserCountRequest {
+  repeated string userId = 1; 
+}
+
+
+message UserCountResponse {
+  int32 teacher = 1;    
+  int32 student = 2; 
+  int32 moderator = 3;
+}
+
+service UserServiceRpc {
+  rpc GetCountUser(UserCountRequest) returns (UserCountResponse);
+}

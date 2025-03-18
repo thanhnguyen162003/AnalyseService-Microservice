@@ -39,6 +39,11 @@ builder.Services
     {
         options.Address = new Uri(builder.Configuration["GRPC:FlashcardService"]);
     });
+builder.Services
+    .AddGrpcClient<UserServiceRpc.UserServiceRpcClient>((services, options) =>
+    {
+        options.Address = new Uri(builder.Configuration["GRPC:UserService"]);
+    });
 
 
 builder.Services.AddGrpc();
