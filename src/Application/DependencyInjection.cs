@@ -9,15 +9,13 @@ using Application.Common.Models.RoadmapDataModel;
 using Application.Common.Ultils;
 using Application.Consumer;
 using Application.Consumer.RetryConsumer;
+using Application.Features.AnalyseFeature.EventHandler;
 using Application.Features.RoadmapFeature.Validators;
-using Application.Features.SubjectFeature.EventHandler;
 using Application.Infrastructure;
 using Application.Services;
-using Application.Services.MaintainService;
 using Application.Services.Search;
 using Infrastructure.Data;
 using Microsoft.OpenApi.Models;
-using Quartz;
 
 namespace Application;
 
@@ -29,17 +27,19 @@ public static class DependencyInjection
         services.AddHostedService<UserRoadmapGenConsumer>();
         services.AddHostedService<UserDataAnalyseRetryConsumer>();
         services.AddHostedService<UserRoadmapGenRetryConsumer>();
-        services.AddHostedService<ConsumerAnalyseService>();
+        services.AddHostedService<FlashcardAnalyzeConsumer>();
+        services.AddHostedService<RecentViewKafkaConsumer>();
         //services.AddHostedService<RoadmapMissedMaintainService>();
         //Inject Service, Repo, etc...
         services.AddSingleton<AnalyseDbContext>();
         services.AddScoped<IClaimInterface, ClaimService>();
         services.AddSingleton<IProducerService, ProducerService>();
+        services.AddSingleton<IProducerBatchService, ProducerBatchService>();
         services.AddScoped<ICloudinaryService, CloudinaryService>();
         services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddScoped<IAWSS3Service, AWSS3Service>();
         services.AddScoped<ISearchService, SearchService>();
-
+        
         
         //validator
         services.AddScoped<IValidator<RoadMapSectionCreateRequestModel>, CreateRoadmapSectionCommandValidator>();
@@ -55,34 +55,32 @@ public static class DependencyInjection
         });
         services.AddHttpContextAccessor();
         services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen(option =>
+        services.AddSwaggerGen(opt =>
         {
-            option.SwaggerDoc("v1", new OpenApiInfo { Title = "Analyse API", Version = "v1" });
-            option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
-                In = ParameterLocation.Header,
-                Description = "Please enter a valid token",
-                Name = "Authorization",
-                Type = SecuritySchemeType.Http,
                 BearerFormat = "JWT",
+                Description = "JWT Authorization header using the Bearer scheme.",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.Http,
                 Scheme = "Bearer"
             });
-            option.AddSecurityRequirement(new OpenApiSecurityRequirement
+            opt.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
                 {
                     new OpenApiSecurityScheme
                     {
                         Reference = new OpenApiReference
                         {
-                            Type=ReferenceType.SecurityScheme,
-                            Id="Bearer"
+                            Id = "Bearer",
+                            Type = ReferenceType.SecurityScheme
                         }
                     },
-                    new string[]{}
+                    Array.Empty<string>()
                 }
             });
         });
-
         return services;
     }
 

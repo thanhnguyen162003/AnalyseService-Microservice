@@ -20,6 +20,8 @@ public class MappingProfile : Profile
         
         CreateMap<RoadmapDetailResponseModel, Roadmap>().ReverseMap();
         
+        CreateMap<RecentViewModel, RecentView>().ReverseMap();
+        
         CreateMap<UserDataAnalyseModel, UserAnalyseEntity>()
             .ForMember(dest => dest.Subjects, opt => opt.MapFrom(src => src.Subjects));
     }

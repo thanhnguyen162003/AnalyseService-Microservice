@@ -7,14 +7,15 @@ using Infrastructure.Data;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Newtonsoft.Json;
+using SharedProject.Constaints;
 using SharedProject.Models;
 
 namespace Application.Consumer.RetryConsumer;
 
-public class UserRoadmapGenRetryConsumer : KafkaConsumerBase5Minutes<UserDataAnalyseModel>
+public class UserRoadmapGenRetryConsumer : KafkaConsumerBase<UserDataAnalyseModel>
 {
     public UserRoadmapGenRetryConsumer(IConfiguration configuration, ILogger<UserRoadmapGenRetryConsumer> logger, IServiceProvider serviceProvider)
-        : base(configuration, logger, serviceProvider, TopicKafkaConstaints.RecommendOnboardingRetryRoadmapGen, "user_data_analyze_roadmap_group")
+        : base(configuration, logger, serviceProvider, TopicKafkaConstaints.RecommendOnboardingRetryRoadmapGen, ConsumerGroup.UserDataAnalyzeRoadmapGroup)
     {
     }
 
@@ -54,25 +55,34 @@ public class UserRoadmapGenRetryConsumer : KafkaConsumerBase5Minutes<UserDataAna
                     .Select(x => x.Roadmap)
                     .ToList();
                 //send back to user 1
-                var random = new Random();
-                var selectedRoadmap = matchingRoadmaps[random.Next(matchingRoadmaps.Count)];
-                RoadmapUserKafkaMessageModel messageModel = new RoadmapUserKafkaMessageModel(){
-                    RoadmapId = selectedRoadmap.Id,
-                    RoadmapName = selectedRoadmap.RoadmapName,
-                    RoadmapSubjectIds = selectedRoadmap.RoadmapSubjectIds,
-                    RoadmapDescription = selectedRoadmap.RoadmapDescription,
-                    TypeExam = selectedRoadmap.TypeExam,
-                    ContentJson = selectedRoadmap.ContentJson,
-                    RoadmapDocumentIds = selectedRoadmap.RoadmapDocumentIds,
-                    UserId = entity.UserId
-                };
-                await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.UserRoadmapGenCreated, entity.UserId.ToString(), messageModel);
+                if (matchingRoadmaps.Count > 0)
+                {
+                    var random = new Random();
+                    var selectedRoadmap = matchingRoadmaps[random.Next(matchingRoadmaps.Count)];
+                    RoadmapUserKafkaMessageModel messageModel = new RoadmapUserKafkaMessageModel(){
+                        RoadmapId = selectedRoadmap.Id,
+                        RoadmapName = selectedRoadmap.RoadmapName,
+                        RoadmapSubjectIds = selectedRoadmap.RoadmapSubjectIds,
+                        RoadmapDescription = selectedRoadmap.RoadmapDescription,
+                        TypeExam = selectedRoadmap.TypeExam,
+                        ContentJson = selectedRoadmap.ContentJson,
+                        RoadmapDocumentIds = selectedRoadmap.RoadmapDocumentIds,
+                        UserId = entity.UserId
+                    };
+                    await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.UserRoadmapGenCreated, entity.UserId.ToString(), messageModel);
+                }
+                else
+                {
+                    logger.LogWarning($"No matching roadmaps found for user {entity.UserId}.");
+                    // Handle the case where no matching roadmaps are found
+                }
             }
             
         }
         catch (Exception ex)
         {
-            await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.RecommendOnboardingRetryRoadmapGen,
+            logger.LogCritical(ex, "this consumer have retry manytime in data recommend it will go to dead letter");
+            await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.RecommendOnboardingDeadLetterRoadmapGen,
                 userModel.UserId.ToString(), userModel);
             logger.LogError(ex, "An error occurred while processing cache operations for key {ex}.", ex.Message);
         }

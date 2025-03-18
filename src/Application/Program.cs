@@ -7,10 +7,10 @@ using Application.Configurations;
 using Carter;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 builder.Services.AddWebServices();
 builder.Services.AddControllers();
 builder.Services.AddCarter();
@@ -50,7 +50,8 @@ builder.Services.AddCors(options =>
             builder.AllowAnyOrigin()
                 .AllowAnyMethod()
                 .AllowAnyHeader()
-                .WithExposedHeaders("Location", "X-Pagination");
+                .WithExposedHeaders("Location", "X-Pagination", "X-Flashcards-Pagination", "X-Subjects-Pagination",
+                "X-Documents-Pagination", "X-Tips-Pagination", "X-Folders-Pagination", "X-Names-Pagination");
         });
 });
 // Register Redis cache
@@ -92,6 +93,10 @@ builder.Services.AddAWSService<IAmazonS3>();
 builder.Services.Configure<AWSOptions>(builder.Configuration.GetSection("AWS"));
 
 var app = builder.Build();
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
+{
+    app.UseScalar();
+}
 app.UseCors("AllowAll");
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseExceptionHandler(options => { });
@@ -100,7 +105,7 @@ app.MapCarter();
 app.UseAuthentication();
 app.MapControllers();
 app.UseAuthorization();
-app.UseSwagger();
-app.UseSwaggerUI();
+//app.UseSwagger();
+//app.UseSwaggerUI();
 // app.UseHealthChecks("/health");
 app.Run();

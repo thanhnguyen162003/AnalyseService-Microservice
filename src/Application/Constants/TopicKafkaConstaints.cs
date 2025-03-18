@@ -12,6 +12,7 @@ public static class TopicKafkaConstaints
     public const string TheoryDeleted = "theory_deleted";
     public const string UserAnalyseData = "user_analyse_data";
     public const string SubjectViewUpdate = "subject_view_update";
+    public const string RecentViewCreated = "recent_view_created";
     
     //Media-topic
     public const string SubjectImageUpdated = "subject_image_updated";
@@ -29,6 +30,8 @@ public static class TopicKafkaConstaints
     public const string UserRoadmapGenCreated = "user_roadmap_gen_created";
     public const string RecommendOnboardingRetry = "recommend_onboarding_retry";
     public const string RecommendOnboardingRetryRoadmapGen = "recommend_onboarding_retry_roadmap_gen";
+    public const string RecommendOnboardingDeadLetter = "recommend_onboarding_dead_letter";
+    public const string RecommendOnboardingDeadLetterRoadmapGen = "recommend_onboarding_dead_letter_roadmap_gen";
     
     //Validation-topic
     public const string SubjectValidation = "subject_validation";

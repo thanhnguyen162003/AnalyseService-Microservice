@@ -7,7 +7,7 @@ public static class JsonHelper
 {
     private static readonly JsonSerializerOptions _snakeCaseOptions = new JsonSerializerOptions
     {
-        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         WriteIndented = true
     };
 

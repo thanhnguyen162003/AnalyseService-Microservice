@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy ASP.Net Core app to Azure Web App - analyse-service
+name: Build and deploy ASP.Net Core app to Azure Web App - highschool-analyze
 
 on:
   push:
@@ -12,6 +12,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read #This is required for actions/checkout
 
     steps:
       - uses: actions/checkout@v4
@@ -41,6 +43,7 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
       id-token: write #This is required for requesting the JWT
+      contents: read #This is required for actions/checkout
 
     steps:
       - name: Download artifact from build job
@@ -51,15 +54,15 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_30355358400E4412BAD93CFB08D511EE }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_725F7A53C1A044BABC4EF772F27EAFB9 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_70467DCD547D42CCB2D397E5C28075B2 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_0BA84C1431A84192A857807F0DA63AB9 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_638655BDB6834AB19B9F72C5C905704C }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_C2423D3520C646FA8FBE4B8F81037AA6 }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'analyse-service'
+          app-name: 'highschool-analyze'
           slot-name: 'Production'
           package: .
           
