@@ -9,8 +9,8 @@ using Application.Common.Models.RoadmapDataModel;
 using Application.Common.Ultils;
 using Application.Consumer;
 using Application.Consumer.RetryConsumer;
+using Application.Features.AnalyseFeature.EventHandler;
 using Application.Features.RoadmapFeature.Validators;
-using Application.Features.SubjectFeature.EventHandler;
 using Application.Infrastructure;
 using Application.Services;
 using Application.Services.Search;
@@ -27,7 +27,7 @@ public static class DependencyInjection
         services.AddHostedService<UserRoadmapGenConsumer>();
         services.AddHostedService<UserDataAnalyseRetryConsumer>();
         services.AddHostedService<UserRoadmapGenRetryConsumer>();
-        services.AddHostedService<ConsumerAnalyseService>();
+        services.AddHostedService<FlashcardAnalyzeConsumer>();
         services.AddHostedService<RecentViewKafkaConsumer>();
         //services.AddHostedService<RoadmapMissedMaintainService>();
         //Inject Service, Repo, etc...
