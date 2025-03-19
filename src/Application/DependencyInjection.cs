@@ -42,7 +42,7 @@ public static class DependencyInjection
         services.AddScoped<IAWSS3Service, AWSS3Service>();
         services.AddScoped<ISearchService, SearchService>();
         services.AddScoped<IFlashcardAnalyzeService, FlashcardAnalyzeService>();
-        
+        services.AddScoped<IFlashcardFormattingService, FlashcardFormattingService>();
         
         //validator
         services.AddScoped<IValidator<RoadMapSectionCreateRequestModel>, CreateRoadmapSectionCommandValidator>();

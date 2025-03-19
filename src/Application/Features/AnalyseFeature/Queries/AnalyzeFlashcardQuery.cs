@@ -20,7 +20,8 @@ namespace Application.Features.AnalyseFeature.Queries
     public class GetUserFlashcardAnalyticsQueryHandler(
         AnalyseDbContext dbContext,
         ILogger<GetUserFlashcardAnalyticsQueryHandler> logger,
-        IFlashcardAnalyzeService  flashcardAnalyzeService)
+        IFlashcardAnalyzeService  flashcardAnalyzeService,
+        IFlashcardFormattingService formattingService)
         : IRequestHandler<GetUserFlashcardAnalyticsQuery, UserFlashcardAnalyticsResponse>
     {
         public async Task<UserFlashcardAnalyticsResponse> Handle(GetUserFlashcardAnalyticsQuery request, CancellationToken cancellationToken)
@@ -220,6 +221,9 @@ namespace Application.Features.AnalyseFeature.Queries
                 
                 // Generate recommendations
                 response.Recommendations = flashcardAnalyzeService.GenerateRecommendations(response);
+                
+                //Formatting some fields
+                formattingService.FormatUserAnalytics(response);
 
                 return response;
             }

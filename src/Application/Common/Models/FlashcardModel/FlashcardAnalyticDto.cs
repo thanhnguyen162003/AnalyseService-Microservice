@@ -26,6 +26,15 @@ public class FlashcardAnalyticDto
     public TimeSpan? TimeToMastery { get; set; }
     public int DaysSinceLastReview => LastViewDate.HasValue ? (int)(DateTime.UtcNow - LastViewDate.Value).TotalDays : 0;
     public string ReviewStatus => GetReviewStatus();
+    
+    // User-friendly formatted fields
+    public string? FormattedAccuracyRate { get; set; }
+    public string? FormattedTimeSpent { get; set; }
+    public string? FormattedAverageAnswerTime { get; set; }
+    public string? FormattedEfficiencyScore { get; set; }
+    public string? FormattedForgettingIndex { get; set; }
+    public string? FormattedReviewPriority { get; set; }
+    public string? FormattedTimeToMastery { get; set; }
 
     private string GetReviewStatus()
     {

@@ -8,15 +8,19 @@ public class UserLearningPatternDto
     public DateTime? LastStudyDate { get; set; }
     public int? OptimalStudyHour { get; set; }
     public int? MostFrequentStudyDay { get; set; }
-    public string PrimaryStudyContext { get; set; }
+    public string? PrimaryStudyContext { get; set; }
     public Dictionary<int, int> StudyHours { get; set; } = new();
     public Dictionary<int, int> EffectiveStudyHours { get; set; } = new();
     public Dictionary<int, int> StudyDaysOfWeek { get; set; } = new();
     public Dictionary<string, int> StudyContexts { get; set; } = new();
     public Dictionary<string, bool> StudyDaysInYear { get; set; } = new();
-    public string LearningSegment { get; set; }
+    public string? LearningSegment { get; set; }
     public double AverageOptimizationScore { get; set; }
     public string RecommendedStudyTime => GetRecommendedStudyTime();
+    
+    // User-friendly formatted fields
+    public string? FormattedStudyFrequency { get; set; }
+    public string? FormattedOptimizationScore { get; set; }
         
     private string GetRecommendedStudyTime()
     {

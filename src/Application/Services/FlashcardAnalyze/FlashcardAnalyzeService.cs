@@ -191,4 +191,5 @@ public class FlashcardAnalyzeService : IFlashcardAnalyzeService
             
             return recommendations;
         }
+        
 }

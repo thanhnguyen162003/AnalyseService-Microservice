@@ -17,6 +17,13 @@ public class AnalyticsSummaryDto
     public int MasteryLevel => CalculateMasteryLevel();
     public double RetentionRate { get; set; }
     public double AverageTimePerCardMs { get; set; }
+    
+    // User-friendly formatted fields
+    public string? FormattedTotalTimeSpent { get; set; }
+    public string? FormattedAverageAccuracy { get; set; }
+    public string? FormattedAverageEfficiency { get; set; }
+    public string? FormattedRetentionRate { get; set; }
+    public string? FormattedAverageTimePerCard { get; set; }
         
     private int CalculateMasteryLevel()
     {
