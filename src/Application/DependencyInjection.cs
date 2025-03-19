@@ -3,6 +3,7 @@ using Application.Common.Behaviours;
 using Application.Common.Interfaces.AWS3ServiceInterface;
 using Application.Common.Interfaces.ClaimInterface;
 using Application.Common.Interfaces.CloudinaryInterface;
+using Application.Common.Interfaces.FlashcardAnalyzeServiceInterface;
 using Application.Common.Interfaces.KafkaInterface;
 using Application.Common.Models;
 using Application.Common.Models.RoadmapDataModel;
@@ -13,6 +14,7 @@ using Application.Features.AnalyseFeature.EventHandler;
 using Application.Features.RoadmapFeature.Validators;
 using Application.Infrastructure;
 using Application.Services;
+using Application.Services.FlashcardAnalyze;
 using Application.Services.Search;
 using Infrastructure.Data;
 using Microsoft.OpenApi.Models;
@@ -39,6 +41,7 @@ public static class DependencyInjection
         services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddScoped<IAWSS3Service, AWSS3Service>();
         services.AddScoped<ISearchService, SearchService>();
+        services.AddScoped<IFlashcardAnalyzeService, FlashcardAnalyzeService>();
         
         
         //validator
