@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace Domain.Enums
 {
-    public enum UserActivityEnum
+    public enum UserActivityType
     {
         Year,
         Month,
-        Week
+        Week,
+        Day
     }
 }
