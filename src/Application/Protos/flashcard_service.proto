@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package Application;
+
+// Define the request message
+message FlashcardRequest {
+	repeated string subjectId = 1;
+}
+
+
+// Define the response message
+message FlashcardResponse {
+	repeated string flashcardId = 1;
+}
+
+service FlashcardServiceRpc {
+	rpc GetFlashcardId(FlashcardRequest) returns (FlashcardResponse);
+}

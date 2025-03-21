@@ -31,6 +31,7 @@ public static class DependencyInjection
         services.AddHostedService<UserRoadmapGenRetryConsumer>();
         services.AddHostedService<FlashcardAnalyzeConsumer>();
         services.AddHostedService<RecentViewKafkaConsumer>();
+        services.AddHostedService<DailyTaskService>();
         //services.AddHostedService<RoadmapMissedMaintainService>();
         //Inject Service, Repo, etc...
         services.AddSingleton<AnalyseDbContext>();

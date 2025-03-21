@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package Application;
+
+message UserCountRequest {
+	string type =1;
+	int32 amount =2;
+	bool isCount =3;
+}
+
+
+message UserCountResponse {
+  repeated UserActivity activities = 1;
+}
+message UserActivity {
+  string date = 1; // Date of activity
+  int32 students = 2;
+  int32 teachers = 3;
+  int32 moderators = 4;
+}
+
+service UserServiceRpc {
+    rpc GetCountUser(UserCountRequest) returns (UserCountResponse);
+}

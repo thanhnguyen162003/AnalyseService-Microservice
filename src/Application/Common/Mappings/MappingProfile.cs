@@ -1,6 +1,7 @@
 
 using Application.Common.Models;
 using Application.Common.Models.RoadmapDataModel;
+using Application.Common.Models.StatisticModel;
 using Domain.Entities;
 using SharedProject.Models;
 
@@ -21,7 +22,8 @@ public class MappingProfile : Profile
         CreateMap<RoadmapDetailResponseModel, Roadmap>().ReverseMap();
         
         CreateMap<RecentViewModel, RecentView>().ReverseMap();
-        
+        CreateMap<UserActivityModel, UserActivityResponseModel>().ReverseMap();
+
         CreateMap<UserDataAnalyseModel, UserAnalyseEntity>()
             .ForMember(dest => dest.Subjects, opt => opt.MapFrom(src => src.Subjects));
     }

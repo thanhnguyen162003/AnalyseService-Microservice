@@ -26,6 +26,7 @@ public class AnalyseDbContext
     public IMongoCollection<FlashcardAnalyticRecord> FlashcardAnalyticRecords => _database.GetCollection<FlashcardAnalyticRecord>("FlashcardAnalyticRecord");
     public IMongoCollection<SessionAnalyticRecord> SessionAnalyticRecords => _database.GetCollection<SessionAnalyticRecord>("SessionAnalyticRecord");
     public IMongoCollection<UserLearningPatternRecord> UserLearningPatternRecords => _database.GetCollection<UserLearningPatternRecord>("UserLearningPatternRecord");
+    public IMongoCollection<UserActivityModel> UserActivityModel => _database.GetCollection<UserActivityModel>("UserActivityModel");
 
     public async Task EnsureIndicesCreatedAsync()
     {
