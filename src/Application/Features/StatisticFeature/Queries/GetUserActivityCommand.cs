@@ -27,6 +27,7 @@ namespace Application.Features.StatisticFeature.Queries
             List<UserActivityModel> list = new List<UserActivityModel>();
             List<DateTime> dates = new List<DateTime>();
             List<UserActivityResponseModel> result = new List<UserActivityResponseModel>();
+
             switch (request.UserActivityType.ToLower())
             {
                 case "year":
@@ -95,25 +96,50 @@ namespace Application.Features.StatisticFeature.Queries
                     break;
 
                 case "week":
-                    if (request.IsCountFrom == false)
+                    var now = DateTime.Now; // 2025-03-22 (Saturday)
+                    int daysToMonday = ((int)now.DayOfWeek + 6) % 7; // Days to subtract to reach Monday
+                    var currentWeekMonday = now.AddDays(-daysToMonday).Date;
+                    var currentWeekSunday = currentWeekMonday.AddDays(6).Date.AddHours(23).AddMinutes(59).AddSeconds(59); // 2025-03-23 23:59:59
+
+
+
+                    if (request.Amount == 0)
                     {
-                        var startDate = DateTime.Now.AddDays(-7 * request.Amount);
-                        dates = Enumerable.Range(0, (7 * request.Amount))
-                            .Select(i => (startDate.AddDays(i)))
+                        // Current week only (Monday to now)
+                        var startDate = currentWeekMonday; // 2025-03-17 00:00:00
+                        var endDate = currentWeekSunday; // 2025-03-23 23:59:59
+                        dates = Enumerable.Range(0, (endDate - startDate).Days + 1)
+                            .Select(i => startDate.AddDays(i))
                             .ToList();
-                        list = await dbContext.UserActivityModel.Find(x => x.Date >= new DateTime(startDate.Year, startDate.Month, 1, 0,0,0 ) && x.Date < DateTime.Now).ToListAsync();
+                        list = await dbContext.UserActivityModel
+                          .Find(x => x.Date >= startDate && x.Date <= endDate)
+                          .ToListAsync();
+                    }
+                    else if (request.IsCountFrom)
+                    {
+                        // Include current week and go back 'amount' weeks
+                        var startDate = currentWeekMonday.AddDays(-7 * request.Amount); // Start from 'amount' weeks ago
+                        var endDate = currentWeekSunday; // Up to now
+                        dates = Enumerable.Range(0, (endDate - startDate).Days + 1)
+                            .Select(i => startDate.AddDays(i))
+                            .ToList();
+                        list = await dbContext.UserActivityModel
+                          .Find(x => x.Date >= startDate && x.Date <= endDate)
+                          .ToListAsync();
                     }
                     else
                     {
-                        var startWeek = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.AddDays(-7 * request.Amount).Day, 0, 0, 0);
-                        var endWeek = request.Amount == 0 ? new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 23, 59, 59) : new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.AddDays(-1).Day, 23, 59, 59);
-
-                        // Generate weeks from startWeek to current week
-                        dates = Enumerable.Range(0, (endWeek - startWeek).Days + 1)
-                            .Select(i => startWeek.AddDays(i))
+                        // Exclude current week, go back 'amount' weeks
+                        var startDate = currentWeekMonday.AddDays(-7 * request.Amount); // Start from 'amount' weeks ago
+                        var endDate = currentWeekMonday.AddDays(-7 * (request.Amount - 1)).AddDays(-1).Date.AddHours(23).AddMinutes(59).AddSeconds(59); // End before current week
+                        dates = Enumerable.Range(0, (endDate - startDate).Days + 1)
+                            .Select(i => startDate.AddDays(i))
                             .ToList();
-                        list = await dbContext.UserActivityModel.Find(x => x.Date >= startWeek && x.Date < endWeek).ToListAsync();
+                        list = await dbContext.UserActivityModel
+                          .Find(x => x.Date >= startDate && x.Date <= endDate)
+                          .ToListAsync();
                     }
+                    
                     result.AddRange(dates.Select(date =>
                     {
 
