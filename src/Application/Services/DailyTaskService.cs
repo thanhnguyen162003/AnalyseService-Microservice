@@ -10,7 +10,7 @@ using static Application.UserServiceRpc;
 
 public class DailyTaskService : BackgroundService
 {
-    private TimeSpan _targetTime = new TimeSpan(23, 59, 59);
+    private TimeSpan _targetTime = new TimeSpan(23, 59, 50);
     private readonly UserServiceRpc.UserServiceRpcClient _userServiceRpcClient;
     private readonly AnalyseDbContext _dbContext;
     public DailyTaskService(UserServiceRpc.UserServiceRpcClient userServiceRpcClient, AnalyseDbContext dbContext)
@@ -22,7 +22,8 @@ public class DailyTaskService : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            var now = DateTime.Now;
+            var utcPlus7Zone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"); // UTC+7
+            var now = TimeZoneInfo.ConvertTime(DateTime.Now, utcPlus7Zone);
             var nextRun = now.Date + _targetTime;
             if (now > nextRun)
             {
@@ -57,7 +58,6 @@ public class DailyTaskService : BackgroundService
 
         }).ToList();
         await _dbContext.UserActivityModel.InsertManyAsync(result);
-        await Task.CompletedTask; // Replace with actual logic
     }
 }
 
