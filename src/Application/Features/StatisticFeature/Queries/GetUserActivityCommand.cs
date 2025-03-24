@@ -8,6 +8,7 @@ using Infrastructure.Data;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using static Application.UserServiceRpc;
 
 namespace Application.Features.StatisticFeature.Queries
 {
@@ -18,7 +19,7 @@ namespace Application.Features.StatisticFeature.Queries
         public bool IsCountFrom { get; set; }
     }
 
-    public class GetUserActivityCommandCHandler(AnalyseDbContext dbContext, IMapper _mapper) : IRequestHandler<GetUserActivityCommand, List<UserActivityResponseModel>>
+    public class GetUserActivityCommandHandler(AnalyseDbContext dbContext, IMapper _mapper, UserServiceRpc.UserServiceRpcClient userServiceRpcClient) : IRequestHandler<GetUserActivityCommand, List<UserActivityResponseModel>>
     {
         public async Task<List<UserActivityResponseModel>> Handle(GetUserActivityCommand request, CancellationToken cancellationToken)
         {
@@ -27,7 +28,7 @@ namespace Application.Features.StatisticFeature.Queries
             List<UserActivityModel> list = new List<UserActivityModel>();
             List<DateTime> dates = new List<DateTime>();
             List<UserActivityResponseModel> result = new List<UserActivityResponseModel>();
-
+            UserCountResponse response = new UserCountResponse();
             switch (request.UserActivityType.ToLower())
             {
                 case "year":
@@ -50,6 +51,25 @@ namespace Application.Features.StatisticFeature.Queries
                             .ToList();
                         list = await dbContext.UserActivityModel.Find(x => x.Date >= new DateTime(startDate, 1, 1, 0, 0, 0) && x.Date < new DateTime(end, 12, 31, 0, 0, 0)).ToListAsync();
                     }
+                    
+                    if (list.Where(x => x.Date.Year == DateTime.Now.Year && x.Date.Month == DateTime.Now.Month && x.Date.Day == DateTime.Now.Day).FirstOrDefault() == null)
+                    {
+                        response = await userServiceRpcClient.GetCountUserAsync(new UserCountRequest()
+                        {
+                            Amount = 0,
+                            IsCount = false,
+                            Type = "Day"
+                        });
+                        list.AddRange(response.Activities.Select(x => new UserActivityModel
+                        {
+                            Date = DateTime.Parse(x.Date),
+                            Moderators = x.Moderators,
+                            Students = x.Students,
+                            Teachers = x.Teachers
+
+                        }).ToList());
+                    }
+                    
                     result.AddRange(dates.Select(date =>
                     {
                         var key = new DateTime(date.Year, date.Month, 1);
@@ -81,6 +101,24 @@ namespace Application.Features.StatisticFeature.Queries
                             .Select(i => startMonth.AddDays(i))
                             .ToList();
                         list = await dbContext.UserActivityModel.Find(x => x.Date >= new DateTime(startMonth.Year, startMonth.Month, 1, 0,0,0) && x.Date < new DateTime(endMonth.Year, endMonth.Month, endMonth.Day, 23,59,59)).ToListAsync();
+                    }
+
+                    if (list.Where(x => x.Date.Year == DateTime.Now.Year && x.Date.Month == DateTime.Now.Month && x.Date.Day == DateTime.Now.Day).FirstOrDefault() == null)
+                    {
+                        response = await userServiceRpcClient.GetCountUserAsync(new UserCountRequest()
+                        {
+                            Amount = 0,
+                            IsCount = false,
+                            Type = "Day"
+                        });
+                        list.AddRange(response.Activities.Select(x => new UserActivityModel
+                        {
+                            Date = DateTime.Parse(x.Date),
+                            Moderators = x.Moderators,
+                            Students = x.Students,
+                            Teachers = x.Teachers
+
+                        }).ToList());
                     }
                     result.AddRange(dates.Select(date =>
                     {
@@ -139,7 +177,25 @@ namespace Application.Features.StatisticFeature.Queries
                           .Find(x => x.Date >= startDate && x.Date <= endDate)
                           .ToListAsync();
                     }
-                    
+
+                    if (list.Where(x => x.Date.Year == DateTime.Now.Year && x.Date.Month == DateTime.Now.Month && x.Date.Day == DateTime.Now.Day).FirstOrDefault() == null)
+                    {
+                        response = await userServiceRpcClient.GetCountUserAsync(new UserCountRequest()
+                        {
+                            Amount = 0,
+                            IsCount = false,
+                            Type = "Day"
+                        });
+                        list.AddRange(response.Activities.Select(x => new UserActivityModel
+                        {
+                            Date = DateTime.Parse(x.Date),
+                            Moderators = x.Moderators,
+                            Students = x.Students,
+                            Teachers = x.Teachers
+
+                        }).ToList());
+                    }
+
                     result.AddRange(dates.Select(date =>
                     {
 
@@ -173,6 +229,24 @@ namespace Application.Features.StatisticFeature.Queries
                             .Select(i => startWeek.AddDays(i))
                             .ToList();
                         list = await dbContext.UserActivityModel.Find(x => x.Date >= startWeek && x.Date < endWeek).ToListAsync();
+                    }
+
+                    if (list.Where(x => x.Date.Year == DateTime.Now.Year && x.Date.Month == DateTime.Now.Month && x.Date.Day == DateTime.Now.Day).FirstOrDefault() == null)
+                    {
+                        response = await userServiceRpcClient.GetCountUserAsync(new UserCountRequest()
+                        {
+                            Amount = 0,
+                            IsCount = false,
+                            Type = "Day"
+                        });
+                        list.AddRange(response.Activities.Select(x => new UserActivityModel
+                        {
+                            Date = DateTime.Parse(x.Date),
+                            Moderators = x.Moderators,
+                            Students = x.Students,
+                            Teachers = x.Teachers
+
+                        }).ToList());
                     }
                     result.AddRange(dates.Select(date =>
                     {
