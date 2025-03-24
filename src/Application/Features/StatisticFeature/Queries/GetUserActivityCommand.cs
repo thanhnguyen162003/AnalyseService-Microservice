@@ -19,7 +19,7 @@ namespace Application.Features.StatisticFeature.Queries
         public bool IsCountFrom { get; set; }
     }
 
-    public class GetUserActivityCommandCHandler(AnalyseDbContext dbContext, IMapper _mapper, UserServiceRpc.UserServiceRpcClient userServiceRpcClient) : IRequestHandler<GetUserActivityCommand, List<UserActivityResponseModel>>
+    public class GetUserActivityCommandHandler(AnalyseDbContext dbContext, IMapper _mapper, UserServiceRpc.UserServiceRpcClient userServiceRpcClient) : IRequestHandler<GetUserActivityCommand, List<UserActivityResponseModel>>
     {
         public async Task<List<UserActivityResponseModel>> Handle(GetUserActivityCommand request, CancellationToken cancellationToken)
         {
