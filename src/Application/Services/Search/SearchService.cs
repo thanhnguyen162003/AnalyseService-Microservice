@@ -5,6 +5,9 @@ using Application.Common.Models.FlashcardFolderModel;
 using Application.Common.Models.NewsModel;
 using Application.Common.Models.SearchModel;
 using Application.Constants;
+using Domain.CustomModel;
+using Domain.Enums;
+using Domain.QueriesFilter;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -35,6 +38,47 @@ public class SearchService : ISearchService
             Tips = await SearchTips(value, page, eachPage)
         };
     }
+
+    public async Task<IEnumerable<CourseQueryModel>> SearchCourseName(SearchCourseType type, string value, int limit)
+    {
+        // Use multiple query to search in multiple index
+        // Query by sort type
+
+        var searchQueries = new List<SearchQuery>();
+
+        for(int i = 1; i <= (int)type; i++)
+        {
+            searchQueries.Add(new SearchQuery(new SearchForFacets
+            {
+                IndexName = IndexSearchConstant.Course,
+                Filters = $"type:{Enum.Parse<SearchCourseType>(i.ToString()).ToString()}",
+                Query = value,
+                Page = 0,
+                HitsPerPage = limit,
+            }));
+        }
+
+        // Search
+        var result = await _client.SearchAsync<object>(
+            new SearchMethodParams
+            {
+                Requests = searchQueries.ToList()
+            }
+        );
+
+        var objects = new List<object>();
+        for (int i = 0; i < (int)type; i++)
+        {
+            objects.AddRange(result.Results.ElementAt(i).AsSearchResponse().Hits);
+        };
+
+        return objects.Select(hit =>
+        {
+            var doc = JsonConvert.DeserializeObject<CourseQueryModel>(hit.ToString());
+
+            return doc!;
+        });
+    } 
 
     public async Task<IEnumerable<SubjectResponseModel>> SearchSubject(string value, int page, int eachPage)
     {

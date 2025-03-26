@@ -18,3 +18,11 @@ public enum SearchType
     Folder = 5,
     News = 6
 }
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum SearchCourseType
+{
+    Lesson = 3,
+    Chapter = 2,
+    SubjectCurriculum = 1
+}

@@ -7,6 +7,15 @@ public class PagedList<T> : List<T>
     public int PageSize { get; set; }
     public int TotalCount { get; set; }
 
+    public PagedList(List<T> items, int currentPage, int totalPage, int pageSize, int totalCount)
+    {
+        CurrentPage = currentPage;
+        TotalPages = totalPage;
+        PageSize = pageSize;
+        TotalCount = totalCount;
+        AddRange(items);
+    }
+
     public PagedList(List<T> items, int count, int pageNumber, int pageSize)
     {
         TotalCount = count;

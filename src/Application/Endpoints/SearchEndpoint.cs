@@ -15,8 +15,9 @@ public class SearchEndpoints : ICarterModule
 
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("api/v1");
-        group.MapGet("search", SearchFlashCard).WithName(nameof(SearchFlashCard));
+        var group = app.MapGroup("api/v1/search");
+        group.MapGet("", SearchFlashCard).WithName(nameof(SearchFlashCard));
+        group.MapGet("courses", SearchCourse).WithName(nameof(SearchCourse));
     }
 
     private static async Task<IResult> SearchFlashCard([AsParameters]SearchQuery searchQuery, ISender sender, CancellationToken cancellationToken, HttpContext context)
@@ -39,6 +40,12 @@ public class SearchEndpoints : ICarterModule
             return JsonHelper.Json(result);
         }
 
-        
+    }
+
+    private static async Task<IResult> SearchCourse([AsParameters] SearchCourseQuery searchCourseQuery, ISender sender, CancellationToken cancellationToken, HttpContext context)
+    {
+        var result = await sender.Send(searchCourseQuery, cancellationToken);
+
+        return JsonHelper.Json(result);
     }
 }

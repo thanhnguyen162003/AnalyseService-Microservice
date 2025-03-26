@@ -8,4 +8,5 @@ public class IndexSearchConstant
     public const string Name = "name";
     public const string News = "news";
     public const string Folder = "folder";
+    public const string Course = "course";
 }
