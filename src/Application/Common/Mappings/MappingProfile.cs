@@ -32,7 +32,7 @@ public class MappingProfile : Profile
         CreateMap<CourseQueryModel, CourseSearchResponseModel>()
             .ForPath(dest => dest.SubjectCurriculum.Id, opt => opt.MapFrom(src => src.SubjectId))
             .ForPath(dest => dest.SubjectCurriculum.Name, opt => opt.MapFrom(src => src.SubjectName))
-            .ForPath(dest => dest.Chapter.Id, opt => opt.MapFrom(src => src.ChapeterId))
+            .ForPath(dest => dest.Chapter.Id, opt => opt.MapFrom(src => src.ChapterId))
             .ForPath(dest => dest.Chapter.Name, opt => opt.MapFrom(src => src.ChapterName))
             .ForPath(dest => dest.Lesson.Id, opt => opt.MapFrom(src => src.LessonId))
             .ForPath(dest => dest.Lesson.Name, opt => opt.MapFrom(src => src.LessonName))

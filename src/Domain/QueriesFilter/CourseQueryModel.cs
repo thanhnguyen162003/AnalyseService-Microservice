@@ -6,7 +6,7 @@
         public string Type { get; set; } = string.Empty;
         public Guid? LessonId { get; set; }
         public string? LessonName { get; set; }
-        public Guid? ChapeterId { get; set; }
+        public Guid? ChapterId { get; set; }
         public string? ChapterName { get; set; }
         public Guid? SubjectId { get; set; }
         public string? SubjectName { get; set; }
