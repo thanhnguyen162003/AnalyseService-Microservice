@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy ASP.Net Core app to Azure Web App - highschool-analyze
+name: Build and deploy ASP.Net Core app to Azure Web App - analytic-service-hs
 
 on:
   push:
@@ -54,15 +54,15 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_0BA84C1431A84192A857807F0DA63AB9 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_638655BDB6834AB19B9F72C5C905704C }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_C2423D3520C646FA8FBE4B8F81037AA6 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_6A9D3C0E54344916BEF5D7EBF710D2D6 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_3B9A3C9A35C74CD4B3CC7723FE342688 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_7BE963B7FC764A1B93A1B585EDF44BB5 }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'highschool-analyze'
+          app-name: 'analytic-service-hs'
           slot-name: 'Production'
           package: .
           

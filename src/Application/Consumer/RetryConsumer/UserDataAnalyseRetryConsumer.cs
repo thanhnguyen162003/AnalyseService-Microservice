@@ -11,7 +11,7 @@ using SharedProject.Models;
 
 namespace Application.Consumer.RetryConsumer;
 
-public class UserDataAnalyseRetryConsumer : KafkaConsumerBase5Minutes<UserDataAnalyseModel>
+public class UserDataAnalyseRetryConsumer : KafkaConsumerBase<UserDataAnalyseModel>
 {
     public UserDataAnalyseRetryConsumer(IConfiguration configuration, ILogger<UserDataAnalyseRetryConsumer> logger, IServiceProvider serviceProvider)
         : base(configuration, logger, serviceProvider, TopicKafkaConstaints.RecommendOnboardingRetry, ConsumerGroup.UserDataAnalyzeGroup)

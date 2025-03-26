@@ -3,16 +3,18 @@ using Application.Common.Behaviours;
 using Application.Common.Interfaces.AWS3ServiceInterface;
 using Application.Common.Interfaces.ClaimInterface;
 using Application.Common.Interfaces.CloudinaryInterface;
+using Application.Common.Interfaces.FlashcardAnalyzeServiceInterface;
 using Application.Common.Interfaces.KafkaInterface;
 using Application.Common.Models;
 using Application.Common.Models.RoadmapDataModel;
 using Application.Common.Ultils;
 using Application.Consumer;
 using Application.Consumer.RetryConsumer;
+using Application.Features.AnalyseFeature.EventHandler;
 using Application.Features.RoadmapFeature.Validators;
-using Application.Features.SubjectFeature.EventHandler;
 using Application.Infrastructure;
 using Application.Services;
+using Application.Services.FlashcardAnalyze;
 using Application.Services.Search;
 using Infrastructure.Data;
 using Microsoft.OpenApi.Models;
@@ -27,8 +29,9 @@ public static class DependencyInjection
         services.AddHostedService<UserRoadmapGenConsumer>();
         services.AddHostedService<UserDataAnalyseRetryConsumer>();
         services.AddHostedService<UserRoadmapGenRetryConsumer>();
-        services.AddHostedService<ConsumerAnalyseService>();
+        services.AddHostedService<FlashcardAnalyzeConsumer>();
         services.AddHostedService<RecentViewKafkaConsumer>();
+        services.AddHostedService<DailyTaskService>();
         //services.AddHostedService<RoadmapMissedMaintainService>();
         //Inject Service, Repo, etc...
         services.AddSingleton<AnalyseDbContext>();
@@ -39,7 +42,8 @@ public static class DependencyInjection
         services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddScoped<IAWSS3Service, AWSS3Service>();
         services.AddScoped<ISearchService, SearchService>();
-        
+        services.AddScoped<IFlashcardAnalyzeService, FlashcardAnalyzeService>();
+        services.AddScoped<IFlashcardFormattingService, FlashcardFormattingService>();
         
         //validator
         services.AddScoped<IValidator<RoadMapSectionCreateRequestModel>, CreateRoadmapSectionCommandValidator>();
