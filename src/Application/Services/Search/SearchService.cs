@@ -39,7 +39,7 @@ public class SearchService : ISearchService
         };
     }
 
-    public async Task<IEnumerable<CourseQueryModel>> SearchCourseName(SearchCourseType type, string value, int limit)
+    public async Task<IEnumerable<CourseSearchResponseModel>> SearchCourseName(SearchCourseType type, string value, int limit)
     {
         // Use multiple query to search in multiple index
         // Query by sort type
@@ -76,7 +76,7 @@ public class SearchService : ISearchService
         {
             var doc = JsonConvert.DeserializeObject<CourseQueryModel>(hit.ToString());
 
-            return doc!;
+            return _mapper.Map<CourseSearchResponseModel>(doc);
         });
     } 
 

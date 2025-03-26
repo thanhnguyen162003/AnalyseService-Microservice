@@ -17,5 +17,5 @@ public interface ISearchService
     Task<IEnumerable<string>> SearchName(string value);
     Task<IEnumerable<NewsPreviewResponseModel>> SearchTips(string value, int page, int eachPage);
     Task<IEnumerable<FolderUserResponse>> SearchFolder(string value, int page, int eachPage);
-    Task<IEnumerable<CourseQueryModel>> SearchCourseName(SearchCourseType type, string value, int limit);
+    Task<IEnumerable<CourseSearchResponseModel>> SearchCourseName(SearchCourseType type, string value, int limit);
 }
