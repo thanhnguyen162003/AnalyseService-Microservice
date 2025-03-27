@@ -22,7 +22,8 @@ public enum SearchType
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum SearchCourseType
 {
-    Lesson = 3,
-    Chapter = 2,
-    SubjectCurriculum = 1
+    Lesson = 4,
+    Chapter = 3,
+    SubjectCurriculum = 2,
+    Subject = 1
 }
