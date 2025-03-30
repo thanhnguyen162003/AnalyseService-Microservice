@@ -55,8 +55,8 @@ namespace Application.Features.StatisticFeature.Queries
                     {
                         TotalActivity = totalCount,
                         VỉewType = request.ViewType,
-                        StartDate = request.StartDate,
-                        EndDate = request.EndDate,
+                        StartYear = request.StartYear,
+                        EndYear = request.EndYear,
                         Data = heatmapData
                     };  
                     break;
@@ -83,8 +83,8 @@ namespace Application.Features.StatisticFeature.Queries
                     {
                         TotalActivity = totalCount,
                         VỉewType = request.ViewType,
-                        StartDate = request.StartDate,
-                        EndDate = request.EndDate,
+                        StartYear = request.StartYear,
+                        EndYear = request.EndYear,
                         Data = heatmapData
                     };
                     break;
