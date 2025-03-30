@@ -12,16 +12,16 @@ using static Application.UserServiceRpc;
 
 namespace Application.Features.StatisticFeature.Queries
 {
-    public class GetUserActivityCommand : IRequest<List<UserActivityResponseModel>>
+    public class GetUserActivityQuery : IRequest<List<UserActivityResponseModel>>
     {
         public int Amount { get; set; }
         public string UserActivityType { get; set; }
         public bool IsCountFrom { get; set; }
     }
 
-    public class GetUserActivityCommandHandler(AnalyseDbContext dbContext, IMapper _mapper, UserServiceRpc.UserServiceRpcClient userServiceRpcClient) : IRequestHandler<GetUserActivityCommand, List<UserActivityResponseModel>>
+    public class GetUserActivityQueryHandler(AnalyseDbContext dbContext, IMapper _mapper, UserServiceRpc.UserServiceRpcClient userServiceRpcClient) : IRequestHandler<GetUserActivityQuery, List<UserActivityResponseModel>>
     {
-        public async Task<List<UserActivityResponseModel>> Handle(GetUserActivityCommand request, CancellationToken cancellationToken)
+        public async Task<List<UserActivityResponseModel>> Handle(GetUserActivityQuery request, CancellationToken cancellationToken)
         {
             var currentDate = DateTime.Now;
            

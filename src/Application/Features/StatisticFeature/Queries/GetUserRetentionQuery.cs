@@ -13,14 +13,14 @@ using static Application.UserServiceRpc;
 
 namespace Application.Features.StatisticFeature.Queries
 {
-    public class GetUserRetentionCommand : IRequest<List<UserRetentionResponseModel>>
+    public class GetUserRetentionQuery : IRequest<List<UserRetentionResponseModel>>
     {
         public string Type { get; set; }
     }
 
-    public class GetUserRetentionCommandHandler(AnalyseDbContext dbContext, IMapper _mapper, UserServiceRpc.UserServiceRpcClient userServiceRpcClient) : IRequestHandler<GetUserRetentionCommand, List<UserRetentionResponseModel>>
+    public class GetUserRetentionQueryHandler(AnalyseDbContext dbContext, IMapper _mapper, UserServiceRpc.UserServiceRpcClient userServiceRpcClient) : IRequestHandler<GetUserRetentionQuery, List<UserRetentionResponseModel>>
     {
-        public async Task<List<UserRetentionResponseModel>> Handle(GetUserRetentionCommand request, CancellationToken cancellationToken)
+        public async Task<List<UserRetentionResponseModel>> Handle(GetUserRetentionQuery request, CancellationToken cancellationToken)
         {
             List<UserRetentionModel> list = new List<UserRetentionModel>();
 
