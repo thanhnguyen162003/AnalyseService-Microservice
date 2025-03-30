@@ -80,4 +80,8 @@
       <Folder Include="KafkaMessageModel\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Include="Features\StatisticFeature\Queries\GetHeatmapQuery.cs" />
+    </ItemGroup>
+
 </Project>
