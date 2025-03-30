@@ -63,13 +63,17 @@ public class StatisticEndpoints : ICarterModule
     //    var result = await sender.Send(command, cancellationToken);
     //    return JsonHelper.Json(result);
     //}
-    public static async Task<IResult> GetHeatMap(string viewType, string startDate, string endDate, ISender sender, CancellationToken cancellationToken)
+    public static async Task<IResult> GetHeatMap(string viewType, int startYear, int endYear, ISender sender, CancellationToken cancellationToken)
     {
+        if (startYear > endYear)
+        {
+            return JsonHelper.Json(new { message = "Start year must be less than end year" });
+        }
         var command = new GetHeatmapQuery()
         {
             ViewType = viewType,
-            EndDate = endDate,
-            StartDate = startDate
+            EndYear = endYear,
+            StartYear = startYear
         };
         var result = await sender.Send(command, cancellationToken);
         return JsonHelper.Json(result);
