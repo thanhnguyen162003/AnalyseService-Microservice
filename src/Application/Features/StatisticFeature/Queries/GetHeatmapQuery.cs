@@ -17,8 +17,8 @@ namespace Application.Features.StatisticFeature.Queries
     public class GetHeatmapQuery : IRequest<HeatmapModel>
     {
         public string ViewType { get; set; }
-        public string StartDate { get; set; }
-        public string EndDate { get; set; }
+        public int StartYear { get; set; }
+        public int EndYear { get; set; }
     }
 
     public class GetHeatmapQueryHandler(AnalyseDbContext dbContext, IMapper _mapper, UserServiceRpc.UserServiceRpcClient userServiceRpcClient, IClaimInterface claimInterface) : IRequestHandler<GetHeatmapQuery, HeatmapModel>
@@ -26,8 +26,8 @@ namespace Application.Features.StatisticFeature.Queries
         public async Task<HeatmapModel> Handle(GetHeatmapQuery request, CancellationToken cancellationToken)
         {
             var userId = claimInterface.GetCurrentUserId;
-            var startDate = DateTime.Parse(request.StartDate);
-            var endDate = DateTime.Parse(request.EndDate);
+            var startDate = new DateTime(request.StartYear,1,1,0,0,0);
+            var endDate = new DateTime(request.EndYear,12,31,23,59,59);
             int totalCount = 0;
             List<HeatmapData> heatmapData = new List<HeatmapData>();
             HeatmapModel response = new HeatmapModel();
