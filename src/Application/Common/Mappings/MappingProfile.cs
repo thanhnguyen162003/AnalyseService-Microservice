@@ -36,6 +36,8 @@ public class MappingProfile : Profile
             .ForPath(dest => dest.Chapter.Name, opt => opt.MapFrom(src => src.ChapterName))
             .ForPath(dest => dest.Lesson.Id, opt => opt.MapFrom(src => src.LessonId))
             .ForPath(dest => dest.Lesson.Name, opt => opt.MapFrom(src => src.LessonName))
+            .ForPath(dest => dest.Subject.Id, opt => opt.MapFrom(src => src.SubjectId))
+            .ForPath(dest => dest.Subject.Name, opt => opt.MapFrom(src => src.SubjectName))
             .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
     }
 }
