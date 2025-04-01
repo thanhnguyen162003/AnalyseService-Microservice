@@ -131,7 +131,7 @@ public class AddUserRetentionCommanddHandler(
 
         for (int i = sortedLogins.Count - 1; i >= 0; i--)
         {
-            if ((today - sortedLogins[i]).TotalDays == streak)
+            if ((today.Date - sortedLogins[i].Date).TotalDays == streak)
             {
                 streak++;
             }
@@ -152,7 +152,7 @@ public class AddUserRetentionCommanddHandler(
 
         for (int i = 1; i < sortedLogins.Count; i++)
         {
-            if ((sortedLogins[i] - sortedLogins[i - 1]).TotalDays == 1)
+            if ((sortedLogins[i].Date - sortedLogins[i - 1].Date).TotalDays == 1)
             {
                 currentStreak++;
             }

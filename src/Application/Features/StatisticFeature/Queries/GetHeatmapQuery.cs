@@ -1,0 +1,104 @@
+﻿using System.Collections.Generic;
+using System.Threading;
+using Amazon.Runtime.Internal.Transform;
+using Application.Common.Interfaces.ClaimInterface;
+using Application.Common.Models.StatisticModel;
+using CloudinaryDotNet.Actions;
+using Domain.Entities;
+using Domain.Enums;
+using Infrastructure.Data;
+using MongoDB.Bson;
+using MongoDB.Driver;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using static Application.UserServiceRpc;
+
+namespace Application.Features.StatisticFeature.Queries
+{
+    public class GetHeatmapQuery : IRequest<HeatmapModel>
+    {
+        public string ViewType { get; set; }
+        public int StartYear { get; set; }
+        public int EndYear { get; set; }
+    }
+
+    public class GetHeatmapQueryHandler(AnalyseDbContext dbContext, IMapper _mapper, UserServiceRpc.UserServiceRpcClient userServiceRpcClient, IClaimInterface claimInterface) : IRequestHandler<GetHeatmapQuery, HeatmapModel>
+    {
+        public async Task<HeatmapModel> Handle(GetHeatmapQuery request, CancellationToken cancellationToken)
+        {
+            var userId = claimInterface.GetCurrentUserId;
+            var startDate = new DateTime(request.StartYear,1,1,0,0,0);
+            var endDate = new DateTime(request.EndYear,12,31,23,59,59);
+            int totalCount = 0;
+            List<HeatmapData> heatmapData = new List<HeatmapData>();
+            HeatmapModel response = new HeatmapModel();
+            switch (request.ViewType.ToLower())
+            {
+                case "flashcard":
+                    var flashcardLearning = await dbContext.UserFlashcardLearningModel.Find(x => x.UserId == userId && x.LearningDates.Any(date => date >= startDate && date <= endDate)).ToListAsync();
+                    heatmapData = flashcardLearning
+                        .SelectMany(x => x.LearningDates)
+                        .Where(date => date >= startDate && date <= endDate) 
+                        .GroupBy(date => date.Date) 
+                        .Select(group => new HeatmapData
+                        {
+                            Date = group.Key.ToString("yyyy-MM-dd"), 
+                            Count = group.Count()
+                        })
+                        .OrderBy(data => data.Date) 
+                        .ToList();
+                    
+                    var learningDates = flashcardLearning
+                        .SelectMany(x => x.LearningDates)
+                        .Where(date => date >= startDate && date <= endDate);  
+                    totalCount = learningDates.Count();
+                    response = new HeatmapModel
+                    {
+                        TotalActivity = totalCount,
+                        VỉewType = request.ViewType,
+                        StartYear = request.StartYear,
+                        EndYear = request.EndYear,
+                        Data = heatmapData
+                    };  
+                    break;
+
+                case "login":
+                    var login = await dbContext.UserRetentionModel.Find(x => x.UserId == userId && x.LoginDate.Any(date => date >= startDate && date <= endDate)).ToListAsync();
+                    heatmapData = login
+                        .SelectMany(x => x.LoginDate)
+                        .Where(date => date >= startDate && date <= endDate)
+                        .GroupBy(date => date.Date)
+                        .Select(group => new HeatmapData
+                        {
+                            Date = group.Key.ToString("yyyy-MM-dd"),
+                            Count = group.Count()
+                        })
+                        .OrderBy(data => data.Date)
+                        .ToList();
+
+                    var loginDates = login
+                        .SelectMany(x => x.LoginDate)
+                        .Where(date => date >= startDate && date <= endDate);
+                    totalCount = loginDates.Count();
+                    response = new HeatmapModel
+                    {
+                        TotalActivity = totalCount,
+                        VỉewType = request.ViewType,
+                        StartYear = request.StartYear,
+                        EndYear = request.EndYear,
+                        Data = heatmapData
+                    };
+                    break;
+
+                case "learnedlesson":
+                    break;
+
+
+            }            
+           
+
+            
+            return response;
+
+        }
+    }
+}

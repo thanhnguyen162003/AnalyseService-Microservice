@@ -32,6 +32,7 @@ public static class DependencyInjection
         services.AddHostedService<FlashcardAnalyzeConsumer>();
         services.AddHostedService<RecentViewKafkaConsumer>();
         services.AddHostedService<DailyTaskService>();
+        services.AddHostedService<FiveMinutesTaskService>();
         //services.AddHostedService<RoadmapMissedMaintainService>();
         //Inject Service, Repo, etc...
         services.AddSingleton<AnalyseDbContext>();

@@ -13,16 +13,17 @@ using static Application.UserServiceRpc;
 
 namespace Application.Features.StatisticFeature.Queries
 {
-    public class GetUserRetentionCommand : IRequest<List<UserRetentionResponseModel>>
+    public class GetUserRetentionQuery : IRequest<List<UserRetentionResponseModel>>
     {
         public string Type { get; set; }
     }
 
-    public class GetUserRetentionCommandHandler(AnalyseDbContext dbContext, IMapper _mapper, UserServiceRpc.UserServiceRpcClient userServiceRpcClient) : IRequestHandler<GetUserRetentionCommand, List<UserRetentionResponseModel>>
+    public class GetUserRetentionQueryHandler(AnalyseDbContext dbContext, IMapper _mapper, UserServiceRpc.UserServiceRpcClient userServiceRpcClient) : IRequestHandler<GetUserRetentionQuery, List<UserRetentionResponseModel>>
     {
-        public async Task<List<UserRetentionResponseModel>> Handle(GetUserRetentionCommand request, CancellationToken cancellationToken)
+        public async Task<List<UserRetentionResponseModel>> Handle(GetUserRetentionQuery request, CancellationToken cancellationToken)
         {
             List<UserRetentionModel> list = new List<UserRetentionModel>();
+
             if (request.Type.ToLower() == "all")
             {
                 list = await dbContext.UserRetentionModel.Find(Builders<UserRetentionModel>.Filter.Empty).ToListAsync();
@@ -33,11 +34,11 @@ namespace Application.Features.StatisticFeature.Queries
             }
             else if (request.Type.ToLower() == "teacher")
             {
-                 list = await dbContext.UserRetentionModel.Find(x => x.RoleId == (int)RoleEnum.Student).ToListAsync();
+                 list = await dbContext.UserRetentionModel.Find(x => x.RoleId == (int)RoleEnum.Teacher).ToListAsync();
             }
             else if (request.Type.ToLower() == "moderator")
             {
-                list = await dbContext.UserRetentionModel.Find(x => x.RoleId == (int)RoleEnum.Student).ToListAsync();
+                list = await dbContext.UserRetentionModel.Find(x => x.RoleId == (int)RoleEnum.Moderator).ToListAsync();
             }
             var ranges = new Dictionary<string, (int Min, int Max)>
             {
