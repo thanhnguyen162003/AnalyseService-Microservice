@@ -6,7 +6,7 @@ public abstract class UniqueKafkaConsumerBase<T> : BackgroundService
 {
     private readonly IConsumer<string, string> _consumer;
     private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<KafkaConsumerBase<T>> _logger;
+    private readonly ILogger<UniqueKafkaConsumerBase<T>> _logger;
     private readonly string _topicName;
 
     protected UniqueKafkaConsumerBase(IConfiguration configuration, ILogger<UniqueKafkaConsumerBase<T>> logger, IServiceProvider serviceProvider, string topicName, string groupId)
