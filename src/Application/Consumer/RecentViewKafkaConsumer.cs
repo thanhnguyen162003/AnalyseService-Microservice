@@ -13,7 +13,7 @@ public class RecentViewKafkaConsumer(
     IConfiguration configuration,
     ILogger<RecentViewKafkaConsumer> logger,
     IServiceProvider serviceProvider)
-    : KafkaConsumerBase<RecentViewModel>(configuration, logger, serviceProvider,
+    : UniqueKafkaConsumerBase<RecentViewModel>(configuration, logger, serviceProvider,
         TopicKafkaConstaints.RecentViewCreated, ConsumerGroup.UserRecentViewGroup)
 {
     protected override async Task ProcessMessage(string message, IServiceProvider serviceProvider)
@@ -47,7 +47,6 @@ public class RecentViewKafkaConsumer(
                 logger.LogInformation($"Removed old entry for UserId {userId}: DocumentId {existingEntry.IdDocument}");
             }
 
-            // Remove the oldest entry if needed
             if (userRecentViews.Count >= 10)
             {
                 var oldestEntry = userRecentViews.Last();

@@ -107,14 +107,12 @@ public class UserDataAnalyseConsumer(
 
         try
         {
-            // Perform batch MongoDB inserts
             if (userEntitiesToInsert.Any())
             {
                 await context.UserAnalyseEntity.InsertManyAsync(userEntitiesToInsert);
                 logger.LogInformation($"Inserted {userEntitiesToInsert.Count} user data entities.");
             }
 
-            // Perform batch MongoDB updates
             foreach (var entity in userEntitiesToUpdate)
             {
                 await context.UserAnalyseEntity.ReplaceOneAsync(
@@ -123,14 +121,12 @@ public class UserDataAnalyseConsumer(
             }
             logger.LogInformation($"Updated {userEntitiesToUpdate.Count} user data entities.");
 
-            // Produce recommended data messages
             foreach (var (key, data) in recommendedDataToProduce)
             {
                 await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.DataRecommended, key, data);
             }
             logger.LogInformation($"Produced {recommendedDataToProduce.Count} recommended data messages.");
 
-            // Retry failed messages
             foreach (var (key, message) in retryMessages)
             {
                 await producer.ProduceObjectWithKeyAsync(TopicKafkaConstaints.RecommendOnboardingRetry, key, message);

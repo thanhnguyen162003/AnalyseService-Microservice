@@ -16,5 +16,5 @@ public class UserAnalyseEntity
     public string? Major { get; set; }
     public string? TypeExam { get; set; }
     [BsonRepresentation(BsonType.String)]
-    public List<Guid> Subjects { get; set; }
+    public List<Guid>? Subjects { get; set; }
 }

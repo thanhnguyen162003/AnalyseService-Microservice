@@ -11,10 +11,6 @@ public class RecommendedData
     [BsonRepresentation(BsonType.String)]
     public List<Guid>? SubjectIds { get; set; }
     [BsonRepresentation(BsonType.String)]
-    public List<Guid>? DocumentIds { get; set; }
-    [BsonRepresentation(BsonType.String)]
-    public List<Guid>? FlashcardIds { get; set; }
-    [BsonRepresentation(BsonType.String)]
     public Guid? UserId { get; set; }
     public int Grade { get; set; }
     public string? TypeExam { get; set; }
