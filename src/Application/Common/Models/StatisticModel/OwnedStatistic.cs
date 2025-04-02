@@ -2,8 +2,12 @@
 
 public class OwnedStatistic
 {
-    public int CurrentStreak { get; set; }
-    public int LongestStreak { get; set; }
-    public int TotalFlashcard { get; set; }
-    public int TotalFlashcardContent { get; set; }
+    public int CurrentLoginStreak { get; set; }
+    public int LongestLoginStreak { get; set; }
+    public int CurrentLearnStreak { get; set; }
+    public int LongestLearnStreak { get; set; }
+    public int TotalFlashcardLearned { get; set; }
+    public int TotalFlashcardContentLearned { get; set; }
+    public int TotalFlashcardLearnDates { get; set; }
+    public double TotalFlashcardContentHours { get; set; }
 }

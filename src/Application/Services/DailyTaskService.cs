@@ -172,10 +172,10 @@ public class DailyTaskService : BackgroundService
     {
         int streak = 0;
         DateTime today = DateTime.Today;
-
-        for (int i = sortedLogins.Count - 1; i >= 0; i--)
+        var uniqueDates = sortedLogins.Select(x => x.Date).Distinct().OrderBy(x => x).ToList();
+        for (int i = uniqueDates.Count - 1; i >= 0; i--)
         {
-            if ((today.Date - sortedLogins[i].Date).TotalDays == streak)
+            if ((today.Date - uniqueDates[i].Date).TotalDays == streak)
             {
                 streak++;
             }
@@ -193,10 +193,10 @@ public class DailyTaskService : BackgroundService
         if (sortedLogins == null || sortedLogins.Count == 0) return 0;
 
         int maxStreak = 1, currentStreak = 1;
-
-        for (int i = 1; i < sortedLogins.Count; i++)
+        var uniqueDates = sortedLogins.Select(x => x.Date).Distinct().OrderBy(x => x).ToList();
+        for (int i = 1; i < uniqueDates.Count; i++)
         {
-            if ((sortedLogins[i].Date - sortedLogins[i - 1].Date).TotalDays == 1)
+            if ((uniqueDates[i].Date - uniqueDates[i - 1].Date).TotalDays == 1)
             {
                 currentStreak++;
             }

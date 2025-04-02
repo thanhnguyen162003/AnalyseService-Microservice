@@ -21,6 +21,7 @@ message UserFlashcardLearning {
 	string flashcardId = 2;
 	string flashcardContentId = 3;
 	repeated string lastReviewDateHistory = 4;
+    repeated double timeSpentHistory = 5;
 }
 service FlashcardServiceRpc {
     rpc GetUserFlashcardLearning(UserFlashcardLearningRequest) returns (UserFlashcardLearningResponse);
