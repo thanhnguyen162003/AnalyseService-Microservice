@@ -16,6 +16,7 @@ namespace Domain.Entities
         public Guid UserId { get; set; }
         [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public List<DateTime> LearningDates { get; set; }
+        public List<double> TimeSpentHistory { get; set; } = new List<double>();
 
     }
 }

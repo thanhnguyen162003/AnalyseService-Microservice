@@ -37,7 +37,8 @@ public class AddUserFlashcardLearningCommandHandler(
                         .SelectMany(x => x.LastReviewDateHistory.Select(DateTime.Parse))
                         .OrderBy(date => date)
                         .ToList(),
-                    UserId = Guid.Parse(group.First().UserId) 
+                    UserId = Guid.Parse(group.First().UserId),
+                    TimeSpentHistory = group.SelectMany(x => x.TimeSpentHistory).ToList()
                 })
                 .ToList();
 
