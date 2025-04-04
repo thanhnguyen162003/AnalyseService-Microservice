@@ -29,6 +29,7 @@ public class AnalyseDbContext
     public IMongoCollection<UserActivityModel> UserActivityModel => _database.GetCollection<UserActivityModel>("UserActivityModel");
     public IMongoCollection<UserRetentionModel> UserRetentionModel => _database.GetCollection<UserRetentionModel>("UserRetentionModel");
     public IMongoCollection<UserFlashcardLearningModel> UserFlashcardLearningModel => _database.GetCollection<UserFlashcardLearningModel>("UserFlashcardLearningModel");
+    public IMongoCollection<UserLessonLearningModel> UserLessonLearningModel => _database.GetCollection<UserLessonLearningModel>("UserLessonLearningModel");
     public async Task EnsureIndicesCreatedAsync()
     {
         // Create index for RecentViews collection

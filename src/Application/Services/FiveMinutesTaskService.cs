@@ -5,6 +5,7 @@ using Application.Common.Models.StatisticModel;
 using Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.Extensions.Hosting;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Net;
@@ -17,10 +18,12 @@ public class FiveMinutesTaskService : BackgroundService
 {
     private readonly FlashcardServiceRpc.FlashcardServiceRpcClient _flashcardServiceRpcClient;
     private readonly AnalyseDbContext _dbContext;
-    public FiveMinutesTaskService(FlashcardServiceRpc.FlashcardServiceRpcClient flashcardServiceRpcClient, AnalyseDbContext dbContext)
+    private readonly EnrollmentServiceRpc.EnrollmentServiceRpcClient _enrollmentService;
+    public FiveMinutesTaskService(FlashcardServiceRpc.FlashcardServiceRpcClient flashcardServiceRpcClient, EnrollmentServiceRpc.EnrollmentServiceRpcClient enrollmentService, AnalyseDbContext dbContext)
     {
         _flashcardServiceRpcClient = flashcardServiceRpcClient ?? throw new ArgumentNullException(nameof(flashcardServiceRpcClient));
         _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+        _enrollmentService = enrollmentService ?? throw new ArgumentNullException(nameof(enrollmentService));
     }
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -29,6 +32,7 @@ public class FiveMinutesTaskService : BackgroundService
             try
             {
                 await AddUserFlashcardLearning();
+                await AddUserLessonLearning();
             }
             catch (Exception ex)
             {
@@ -39,7 +43,63 @@ public class FiveMinutesTaskService : BackgroundService
             await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
         }
     }
+    private async Task AddUserLessonLearning()
+    {
+        try
+        {
+            var response = await _enrollmentService.GetEnrollmentAsync(new EnrollmentRequest());
+            var today = DateTime.Today; // Get current date for comparison
 
+            foreach (var enrollment in response.Enrollment)
+            {
+                var lessonLearnDates = enrollment.LessonLearnDate; // repeated string from proto
+                if (lessonLearnDates.Count == 0) continue;
+
+                var userIdGuid = Guid.Parse(enrollment.UserId);
+                var filter = Builders<UserLessonLearningModel>.Filter.Eq(u => u.UserId, userIdGuid);
+                var existingUser = await _dbContext.UserLessonLearningModel.Find(filter).FirstOrDefaultAsync();
+
+                // Convert lessonLearnDates strings to DateTime and filter today's lessons
+                var parsedDates = lessonLearnDates.Select(d => DateTime.Parse(d)).ToList();
+                var todayLessonsCount = parsedDates.Count(d => d.Date == today);
+
+                if (existingUser != null)
+                {
+                    // Calculate the difference based on today's count
+                    int oldToday = existingUser.TodayLessonsLearned;
+                    int diff = todayLessonsCount - oldToday;
+
+                    if (diff != 0 || !existingUser.LearningDates.SequenceEqual(parsedDates))
+                    {
+                        var update = Builders<UserLessonLearningModel>.Update
+                            .Set(u => u.TodayLessonsLearned, todayLessonsCount)
+                            .Set(u => u.LearningDates, parsedDates)
+                            .Inc(u => u.TotalLessonsLearned, diff);
+
+                        await _dbContext.UserLessonLearningModel.UpdateOneAsync(filter, update);
+                    }
+                }
+                else
+                {
+                    // Create new user record
+                    var newUser = new UserLessonLearningModel
+                    {
+                        Id = ObjectId.GenerateNewId().ToString(),
+                        UserId = userIdGuid,
+                        TodayLessonsLearned = todayLessonsCount,
+                        TotalLessonsLearned = parsedDates.Count, // Total is all lessons, not just today's
+                        LearningDates = parsedDates
+                    };
+
+                    await _dbContext.UserLessonLearningModel.InsertOneAsync(newUser);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+    }
     private async Task AddUserFlashcardLearning()
     {
         try

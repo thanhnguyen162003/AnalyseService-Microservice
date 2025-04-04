@@ -24,16 +24,19 @@ namespace Application.Features.StatisticFeature.Queries
             var userId = claimInterface.GetCurrentUserId;
             var retention = await dbContext.UserRetentionModel.Find(x => x.UserId == userId).SingleOrDefaultAsync();
             var flashcardLearning = await dbContext.UserFlashcardLearningModel.Find(x => x.UserId == userId).ToListAsync();
+            var lesson = await dbContext.UserLessonLearningModel.Find(x => x.UserId == userId).SingleOrDefaultAsync();
             var response = new OwnedStatistic()
             {
-                CurrentLoginStreak = retention.CurrentStreak,
-                LongestLoginStreak = retention.MaxStreak,
-                TotalFlashcardLearned = flashcardLearning.Select(x => x.FlashcardId).Distinct().Count(),
-                TotalFlashcardContentLearned = flashcardLearning.Select(x => x.FlashcardContentId).Distinct().Count(),
-                CurrentLearnStreak = CalculateCurrentStreak(flashcardLearning.SelectMany(x => x.LearningDates).ToList()),
-                LongestLearnStreak = CalculateMaxStreak(flashcardLearning.SelectMany(x => x.LearningDates).ToList()),
-                TotalFlashcardContentHours = flashcardLearning.SelectMany(x => x.TimeSpentHistory).Sum(),
-                TotalFlashcardLearnDates = CalculateDateAmount(flashcardLearning.SelectMany(x => x.LearningDates).ToList())
+                CurrentLoginStreak = retention?.CurrentStreak ?? 0,
+                LongestLoginStreak = retention?.MaxStreak ?? 0,
+                TodayLessonLearned = lesson?.TodayLessonsLearned ?? 0,
+                TotalLessonLearned = lesson?.TotalLessonsLearned ?? 0,
+                TotalFlashcardLearned = flashcardLearning?.Select(x => x?.FlashcardId).Distinct().Count() ?? 0,
+                TotalFlashcardContentLearned = flashcardLearning?.Select(x => x?.FlashcardContentId).Distinct().Count() ?? 0,
+                CurrentLearnStreak = CalculateCurrentStreak(flashcardLearning?.SelectMany(x => x?.LearningDates ?? Enumerable.Empty<DateTime>()).ToList() ?? new List<DateTime>()),
+                LongestLearnStreak = CalculateMaxStreak(flashcardLearning?.SelectMany(x => x?.LearningDates ?? Enumerable.Empty<DateTime>()).ToList() ?? new List<DateTime>()),
+                TotalFlashcardContentHours = flashcardLearning?.SelectMany(x => x?.TimeSpentHistory ?? Enumerable.Empty<double>()).Sum() ?? 0,
+                TotalFlashcardLearnDates = CalculateDateAmount(flashcardLearning?.SelectMany(x => x?.LearningDates ?? Enumerable.Empty<DateTime>()).ToList() ?? new List<DateTime>())
             };
             return response;
 

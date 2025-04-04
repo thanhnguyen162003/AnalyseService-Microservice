@@ -44,6 +44,11 @@ builder.Services
     {
         options.Address = new Uri(builder.Configuration["GRPC:UserService"]);
     });
+builder.Services
+    .AddGrpcClient<EnrollmentServiceRpc.EnrollmentServiceRpcClient>((services, options) =>
+    {
+        options.Address = new Uri(builder.Configuration["GRPC:DocumentService"]);
+    });
 
 
 builder.Services.AddGrpc();
