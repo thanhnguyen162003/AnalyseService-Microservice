@@ -132,9 +132,177 @@ namespace Application.Features.StatisticFeature.Queries
                         Data = heatmapData
                     };
                     break;
+
                 case "learnedlesson":
+                    var lesson = await dbContext.UserLessonLearningModel.Find(x => x.UserId == userId && x.LearningDates.Any(date => date >= startDate && date <= endDate)).ToListAsync();
+                    heatmapData = lesson
+                        .SelectMany(x => x.LearningDates)
+                        .Where(date => date >= startDate && date <= endDate)
+                        .GroupBy(date => date.Date)
+                        .Select(group => new HeatmapData
+                        {
+                            Date = group.Key.ToString("yyyy-MM-dd"),
+                            Count = group.Count()
+                        })
+                        .OrderBy(data => data.Date)
+                        .ToList();
+
+                    var lessonDates = lesson
+                        .SelectMany(x => x.LearningDates)
+                        .Where(date => date >= startDate && date <= endDate);
+                    totalCount = lessonDates.Count();
+                    response = new HeatmapModel
+                    {
+                        TotalActivity = totalCount,
+                        VỉewType = request.ViewType,
+                        StartYear = request.StartYear,
+                        EndYear = request.EndYear,
+                        Data = heatmapData
+                    };
                     break;
 
+                case "flashcard/learnedlesson":
+                    flashcardLearning = await dbContext.UserFlashcardLearningModel.Find(x => x.UserId == userId && x.LearningDates.Any(date => date >= startDate && date <= endDate)).ToListAsync();
+                    lesson = await dbContext.UserLessonLearningModel.Find(x => x.UserId == userId && x.LearningDates.Any(date => date >= startDate && date <= endDate)).ToListAsync();
+                    heatmapData.AddRange(lesson
+                        .SelectMany(x => x.LearningDates)
+                        .Where(date => date >= startDate && date <= endDate)
+                        .GroupBy(date => date.Date)
+                        .Select(group => new HeatmapData
+                        {
+                            Date = group.Key.ToString("yyyy-MM-dd"),
+                            Count = group.Count()
+                        })
+                        .OrderBy(data => data.Date)
+                        .ToList());
+                    heatmapData.AddRange(flashcardLearning
+                        .SelectMany(x => x.LearningDates)
+                        .Where(date => date >= startDate && date <= endDate)
+                        .GroupBy(date => date.Date)
+                        .Select(group => new HeatmapData
+                        {
+                            Date = group.Key.ToString("yyyy-MM-dd"),
+                            Count = group.Count()
+                        })
+                        .OrderBy(data => data.Date)
+                        .ToList());
+
+                    lessonDates = lesson
+                        .SelectMany(x => x.LearningDates)
+                        .Where(date => date >= startDate && date <= endDate);
+                    learningDates = flashcardLearning
+                        .SelectMany(x => x.LearningDates)
+                        .Where(date => date >= startDate && date <= endDate);
+                    totalCount = lesson.Count() + learningDates.Count();
+                    response = new HeatmapModel
+                    {
+                        TotalActivity = totalCount,
+                        VỉewType = request.ViewType,
+                        StartYear = request.StartYear,
+                        EndYear = request.EndYear,
+                        Data = heatmapData
+                    };
+                    break;
+
+                case "login/learnedlesson":
+                    login = await dbContext.UserRetentionModel.Find(x => x.UserId == userId && x.LoginDate.Any(date => date >= startDate && date <= endDate)).ToListAsync();
+                    lesson = await dbContext.UserLessonLearningModel.Find(x => x.UserId == userId && x.LearningDates.Any(date => date >= startDate && date <= endDate)).ToListAsync();
+                    heatmapData.AddRange(lesson
+                        .SelectMany(x => x.LearningDates)
+                        .Where(date => date >= startDate && date <= endDate)
+                        .GroupBy(date => date.Date)
+                        .Select(group => new HeatmapData
+                        {
+                            Date = group.Key.ToString("yyyy-MM-dd"),
+                            Count = group.Count()
+                        })
+                        .OrderBy(data => data.Date)
+                        .ToList());
+                    heatmapData.AddRange(login
+                        .SelectMany(x => x.LoginDate)
+                        .Where(date => date >= startDate && date <= endDate)
+                        .GroupBy(date => date.Date)
+                        .Select(group => new HeatmapData
+                        {
+                            Date = group.Key.ToString("yyyy-MM-dd"),
+                            Count = group.Count()
+                        })
+                        .OrderBy(data => data.Date)
+                        .ToList());
+
+                    lessonDates = lesson
+                        .SelectMany(x => x.LearningDates)
+                        .Where(date => date >= startDate && date <= endDate);
+                    loginDates = login
+                        .SelectMany(x => x.LoginDate)
+                        .Where(date => date >= startDate && date <= endDate);
+                    totalCount = lesson.Count() + loginDates.Count();
+                    response = new HeatmapModel
+                    {
+                        TotalActivity = totalCount,
+                        VỉewType = request.ViewType,
+                        StartYear = request.StartYear,
+                        EndYear = request.EndYear,
+                        Data = heatmapData
+                    };
+                    break;
+
+                case "flashcard/login/learnedlesson":
+                    flashcardLearning = await dbContext.UserFlashcardLearningModel.Find(x => x.UserId == userId && x.LearningDates.Any(date => date >= startDate && date <= endDate)).ToListAsync();
+                    lesson = await dbContext.UserLessonLearningModel.Find(x => x.UserId == userId && x.LearningDates.Any(date => date >= startDate && date <= endDate)).ToListAsync();
+                    login = await dbContext.UserRetentionModel.Find(x => x.UserId == userId && x.LoginDate.Any(date => date >= startDate && date <= endDate)).ToListAsync();
+                    heatmapData.AddRange(login
+                        .SelectMany(x => x.LoginDate)
+                        .Where(date => date >= startDate && date <= endDate)
+                        .GroupBy(date => date.Date)
+                        .Select(group => new HeatmapData
+                        {
+                            Date = group.Key.ToString("yyyy-MM-dd"),
+                            Count = group.Count()
+                        })
+                        .OrderBy(data => data.Date)
+                        .ToList());
+                    heatmapData.AddRange(lesson
+                        .SelectMany(x => x.LearningDates)
+                        .Where(date => date >= startDate && date <= endDate)
+                        .GroupBy(date => date.Date)
+                        .Select(group => new HeatmapData
+                        {
+                            Date = group.Key.ToString("yyyy-MM-dd"),
+                            Count = group.Count()
+                        })
+                        .OrderBy(data => data.Date)
+                        .ToList());
+                    heatmapData.AddRange(flashcardLearning
+                        .SelectMany(x => x.LearningDates)
+                        .Where(date => date >= startDate && date <= endDate)
+                        .GroupBy(date => date.Date)
+                        .Select(group => new HeatmapData
+                        {
+                            Date = group.Key.ToString("yyyy-MM-dd"),
+                            Count = group.Count()
+                        })
+                        .OrderBy(data => data.Date)
+                        .ToList());
+                    loginDates = login
+                        .SelectMany(x => x.LoginDate)
+                        .Where(date => date >= startDate && date <= endDate);
+                    lessonDates = lesson
+                        .SelectMany(x => x.LearningDates)
+                        .Where(date => date >= startDate && date <= endDate);
+                    learningDates = flashcardLearning
+                        .SelectMany(x => x.LearningDates)
+                        .Where(date => date >= startDate && date <= endDate);
+                    totalCount = lesson.Count() + learningDates.Count() + loginDates.Count();
+                    response = new HeatmapModel
+                    {
+                        TotalActivity = totalCount,
+                        VỉewType = request.ViewType,
+                        StartYear = request.StartYear,
+                        EndYear = request.EndYear,
+                        Data = heatmapData
+                    };
+                    break;
 
             }            
            

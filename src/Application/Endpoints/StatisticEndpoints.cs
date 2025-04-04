@@ -20,7 +20,8 @@ public class StatisticEndpoints : ICarterModule
         group.MapGet("ownedStatistic", GetOwnedStatistic).RequireAuthorization().WithName(nameof(GetOwnedStatistic));
         group.MapGet("heatmap", GetHeatMap).RequireAuthorization().WithName(nameof(GetHeatMap));
         //group.MapPost("testAdd", AddTest).WithName(nameof(AddTest));
-        group.MapPost("userRetention", AddUserRetention).WithName(nameof(AddUserRetention));
+        //group.MapPost("userRetention", AddUserRetention).WithName(nameof(AddUserRetention));
+        //group.MapPost("userLessonLearning", AddUserLessonLearning).WithName(nameof(AddUserLessonLearning));
         //group.MapPost("userFlashcardLearning", AddUserFlashcardLearning).WithName(nameof(AddUserFlashcardLearning));
     }
 
@@ -46,15 +47,24 @@ public class StatisticEndpoints : ICarterModule
     //    var result = await sender.Send(command, cancellationToken);
     //    return JsonHelper.Json(result);
     //}
-    public static async Task<IResult> AddUserRetention(ISender sender, CancellationToken cancellationToken)
-    {
-        var command = new AddUserRetentionCommand()
-        {
-        };
-        var result = await sender.Send(command, cancellationToken);
-        return JsonHelper.Json(result);
-    }
-    //public static async Task<IResult> AddUserFlashcardLearning( ISender sender, CancellationToken cancellationToken)
+    //public static async Task<IResult> AddUserLessonLearning(ISender sender, CancellationToken cancellationToken)
+    //{
+    //    var command = new AddUserLessonLearningCommand()
+    //    {
+
+    //    };
+    //    var result = await sender.Send(command, cancellationToken);
+    //    return JsonHelper.Json(result);
+    //}
+    //public static async Task<IResult> AddUserRetention(ISender sender, CancellationToken cancellationToken)
+    //{
+    //    var command = new AddUserRetentionCommand()
+    //    {
+    //    };
+    //    var result = await sender.Send(command, cancellationToken);
+    //    return JsonHelper.Json(result);
+    //}
+    ////public static async Task<IResult> AddUserFlashcardLearning( ISender sender, CancellationToken cancellationToken)
     //{
     //    var command = new AddUserFlashcardLearningCommand()
     //    {

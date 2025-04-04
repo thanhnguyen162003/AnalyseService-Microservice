@@ -56,6 +56,9 @@
     <Protobuf Include="Protos\subject_service.proto" GrpcServices="Client">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Protobuf>
+    <Protobuf Include="Protos\enrollment_service.proto" GrpcServices="Client">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Protobuf>
     <Protobuf Include="Protos\lesson_service.proto" GrpcServices="Client">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Protobuf>
